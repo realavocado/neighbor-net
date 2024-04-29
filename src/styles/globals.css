@@ -1,0 +1,18 @@
+.mapboxgl-popup-close-button {
+  display: none;
+}
+
+div .mapboxgl-popup-content {
+  font: 400 15px/22px 'Source Sans Pro', 'Helvetica Neue', sans-serif;
+  padding: 0;
+  background: none;
+}
+
+div .mapboxgl-popup-anchor-top > .mapboxgl-popup-tip {
+  align-self: center;
+  border-bottom-color: var(--nextui-colors-background);
+}
+
+.popIcon {
+  color: var(--nextui-colors-blue600);
+}
