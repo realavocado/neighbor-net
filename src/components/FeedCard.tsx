@@ -9,6 +9,7 @@ import {
   Dropdown,
   Image,
   Grid,
+  Collapse,
 } from "@nextui-org/react";
 import {
   MdLocationOn,
@@ -45,6 +46,7 @@ export default function FeedCard(props: FeedCardInterface) {
     db.doc(`feed/${props.id}`).delete();
   }
 
+
   return (
     <>
       <Card>
@@ -57,7 +59,7 @@ export default function FeedCard(props: FeedCardInterface) {
             <div
               style={{ display: "flex", flexDirection: "row" }}
             >
-              {props.item.eventType == "incident" ? (
+              {props.item.eventType ? (
                 <Button flat auto rounded color="warning">
                   <Text
                     css={{ color: "inherit" }}
@@ -65,12 +67,13 @@ export default function FeedCard(props: FeedCardInterface) {
                     weight="bold"
                     transform="uppercase"
                   >
-                    Incident
+                    {props.item.eventType}
                   </Text>
                 </Button>
               ) : (
                 <div></div>
               )}
+
               {auth.currentUser?.uid == props.item.authorId ? (
                 <Dropdown>
                   <Dropdown.Button light>
@@ -144,6 +147,15 @@ export default function FeedCard(props: FeedCardInterface) {
           </Container>
         </Card.Body>
         <Card.Divider />
+        {props.item.replyMessages?(
+          <Collapse.Group accordion={false}>
+          {props.item.replyMessages.map((reply) => (
+            <Collapse title={reply.title} subtitle={reply.author.fullName}>
+              <Text>{reply.description}</Text>
+            </Collapse>
+          ))}
+          </Collapse.Group>
+        ): null}
         <Card.Footer>
           <Row align="center" justify="space-between">
             <Row>
@@ -152,14 +164,18 @@ export default function FeedCard(props: FeedCardInterface) {
                 {convertDate(props.item.creationDate)}
               </Text>
             </Row>
-            <Button.Group color="primary" size="sm" flat>
-              <Button>
-                <MdThumbDown />
-              </Button>
-              <Button>
-                <MdThumbUp />
-              </Button>
-            </Button.Group>
+            { props.item.visibility?
+            (<Button flat auto rounded color="secondary">
+                  <Text
+                    css={{ color: "inherit" }}
+                    size={12}
+                    weight="bold"
+                    transform="uppercase"
+                  >
+                    {props.item.visibility}
+                  </Text>
+            </Button>)
+            :null}
           </Row>
         </Card.Footer>
       </Card>

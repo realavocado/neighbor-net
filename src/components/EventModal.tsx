@@ -16,6 +16,7 @@ import {
   Checkbox,
   Collapse,
   Container,
+  Dropdown
 } from "@nextui-org/react";
 import { useCallback, useEffect, useState } from "react";
 import { AddressAutofill, config } from "@mapbox/search-js-react";
@@ -148,11 +149,48 @@ export default function EventModal(props: EventModalProps) {
 
   const subjects = [
     { value: "Incident", label: "Incident" },
+    { value: "Regular", label: "Regular" },
     { value: "Lost Pet", label: "Lost Pet" },
     { value: "Event", label: "Event" },
     { value: "Other", label: "Other" },
   ];
 
+  const recepients = [
+    { label: "All Block", value: "Block" },
+    { label: "All Neigborhood", value: "Hood" },
+    { label: "All Friends", value: "Friends" },
+    { label: "All Neighbors", value: "Neighbors" },
+    { label: "A Friend", value: "Friend" },
+    { label: "A Neighbor", value: "Neighbor" },
+  ];
+
+  const friends_t = [
+    { id: "1", name: "John Doe" },
+    { id: "2", name: "Jane Doe" },
+    { id: "3", name: "Sam Smith" },
+  ];
+
+  const neighbors_t = [
+    { id: "1", name: "John Doe" },
+    { id: "2", name: "Jane Doe" },
+    { id: "3", name: "Sam Smith" },
+  ];
+
+  const [selectedSubject, setSelectedSubject] = useState(subjects[0].value);
+  const [recipientType, setRecipientType] = useState(recepients[0].value);
+  const [selectedFriend, setSelectedFriend] = useState('');
+  const [selectedNeighbor, setSelectedNeighbor] = useState('');
+  
+
+  const handleFriendChange = (event: any) => {
+    setSelectedFriend(event.currentKey);
+    setSelectedNeighbor(''); // Reset neighbor selection
+  };
+
+  const handleNeighborChange = (event: any) => {
+    setSelectedNeighbor(event.currentKey);
+    setSelectedFriend(''); // Reset friend selection
+  };
 
   return (
     <Collapse.Group bordered>
@@ -168,13 +206,74 @@ export default function EventModal(props: EventModalProps) {
               </SelectItem>
             ))}
           </Select> */}
-          <Radio.Group orientation="horizontal" label="subjects" color="primary" defaultValue={subjects[0].value} >
+          <Radio.Group orientation="horizontal" label="subjects" 
+          color="primary" 
+          value={recipientType}
+          onChange = {setRecipientType}>
             {subjects.map((subject) => (
-              < Radio value={subject.value} color="primary">
+              <Radio value={subject.value} color="primary" size="sm">
                 {subject.label}
               </Radio>
             ))}
           </Radio.Group>
+          
+          <Radio.Group orientation="horizontal" label="recepients" 
+            color="primary" 
+            value={recipientType}
+            onChange = {setRecipientType}>
+            {recepients.map((recepient) => (
+              <Radio key={recepient.value} value={recepient.value} 
+              color="primary" size="sm">
+                {recepient.label}
+              </Radio>
+            ))}
+          </Radio.Group>
+
+
+          {recipientType === 'Friend'? (
+            <>
+              <Dropdown>
+              <Dropdown.Button flat color="primary" css={{ tt: "capitalize" }}>
+                {selectedFriend ? selectedFriend : "Select Friend"}
+              </Dropdown.Button>
+              <Dropdown.Menu
+                aria-label="Friend"
+                color="primary"
+                disallowEmptySelection
+                selectionMode="single"
+                selectedKeys={selectedFriend}
+                onSelectionChange={handleFriendChange}
+              >
+                {friends_t.map((friend) => (
+                  <Dropdown.Item key={friend.name}>
+                    {friend.name}
+                  </Dropdown.Item>
+                ))}
+              </Dropdown.Menu>
+            </Dropdown>
+            </>
+          ): recipientType === 'Neighbor'?(
+            <Dropdown>
+              <Dropdown.Button flat color="primary" css={{ tt: "capitalize" }}>
+                {selectedNeighbor ? selectedNeighbor : "Select Neighbor"}
+              </Dropdown.Button>
+              <Dropdown.Menu
+                aria-label="Neighbor"
+                color="primary"
+                disallowEmptySelection
+                selectionMode="single"
+                selectedKeys={selectedNeighbor}
+                onSelectionChange={handleNeighborChange}
+              >
+                {neighbors_t.map((neighbor) => (
+                  <Dropdown.Item key={neighbor.name}>
+                    {neighbor.name}
+                  </Dropdown.Item>
+                ))}
+              </Dropdown.Menu>
+            </Dropdown>
+          ): null}
+      
           <Input
             {...titleBindings}
             bordered

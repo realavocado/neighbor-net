@@ -7,7 +7,7 @@ interface RequestCardInterface {
     onRequestReject: () => void;
 }
 
-export default function FeedCard(props: RequestCardInterface) {
+export default function RequestCard(props: RequestCardInterface) {
     return (
       <>
         <Card>
@@ -18,7 +18,7 @@ export default function FeedCard(props: RequestCardInterface) {
             <h3>{props.username} wants to add you as friend</h3>
             ): null)}
             <Button.Group>
-              <Button onClick={props.onRequestAccept} color="success">Accept</Button>
+              <Button onClick={props.onRequestAccept} color="default">Accept</Button>
               <Button onClick={props.onRequestReject} color="error">Reject</Button>
             </Button.Group>
           </Card.Body>

@@ -19,4 +19,5 @@ export default interface FeedItem {
   eventTime?: number;
   eventType: string;
   replyMessages?: FeedItem[];
+  visibility?: string;
 }
