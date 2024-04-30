@@ -14,6 +14,7 @@ import {
   Row,
   Spacer,
   Text,
+  Textarea,
   useInput,
 } from "@nextui-org/react";
 import Link from "next/link";
@@ -58,6 +59,17 @@ export default function MainNavbar() {
     setImages(imageList as never[]);
   };
 
+  // For edit profile
+  const [address, setAddress] = useState(userData?.address || ''); // Initialize address state with userData?.address
+  const [fullName, setFullName] = useState(userData?.fullName || '');
+  const [bio, setBio] = useState(userData?.bio || '');
+  
+  function handleSubmit() {
+    console.log(userData?.fullName)
+    console.log(address)
+    console.log(fullName)
+  }
+
   return (
     <Navbar variant={"sticky"}>
       <Navbar.Brand>
@@ -78,6 +90,9 @@ export default function MainNavbar() {
         </Link>
         <Link href={"/map"} passHref legacyBehavior>
           <Navbar.Link isActive={router.pathname == "/map"}>Map</Navbar.Link>
+        </Link>
+        <Link href={"/request"} passHref legacyBehavior>
+          <Navbar.Link isActive={router.pathname == "/request"}>Request</Navbar.Link>
         </Link>
       </Navbar.Content>
       <LoginModal visible={visible} setVisible={setVisible} />
@@ -142,8 +157,46 @@ export default function MainNavbar() {
             color="primary"
             size="lg"
             label="Username"
-            initialValue={userData?.fullName}
+            // initialValue={userData?.fullName}
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
           />
+
+          <Textarea
+            bordered
+            fullWidth
+            color="primary"
+            size="lg"
+            label="bio"
+            // initialValue={userData?.bio}
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+          />
+
+          <Input
+            bordered
+            fullWidth
+            color="primary"
+            size="lg"
+            label="address"
+            // initialValue={userData?.address}
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+          />
+
+          <Button
+            // disabled={
+            //   titleValue.length < 4 ||
+            //   descriptionValue.length < 4 ||
+            //   locationValue.length < 3 ||
+            //   disableSubmit
+            // }
+            onPress={handleSubmit}
+          >
+            <>Update</>
+          </Button>
+
+          
         </Modal.Body>
       </Modal>
       <Navbar.Content>
@@ -227,6 +280,11 @@ export default function MainNavbar() {
         <Navbar.CollapseItem key={"map"}>
           <Link color="inherit" href="/map">
             Map
+          </Link>
+        </Navbar.CollapseItem>
+        <Navbar.CollapseItem key={"request"}>
+          <Link color="inherit" href="/request">
+            Request
           </Link>
         </Navbar.CollapseItem>
       </Navbar.Collapse>

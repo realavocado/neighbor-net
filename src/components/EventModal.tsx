@@ -9,6 +9,7 @@ import {
   Loading,
   Row,
   Spacer,
+  Radio,
   Text,
   Textarea,
   useInput,
@@ -145,17 +146,35 @@ export default function EventModal(props: EventModalProps) {
     resetDate()
   }
 
+  const subjects = [
+    { value: "Incident", label: "Incident" },
+    { value: "Lost Pet", label: "Lost Pet" },
+    { value: "Event", label: "Event" },
+    { value: "Other", label: "Other" },
+  ];
+
+
   return (
     <Collapse.Group bordered>
-      <Collapse title={"New Post"}>
+      <Collapse title={"New Thread"}>
         <Container>
-          <Checkbox
-            isSelected={isIncident}
-            color="primary"
-            onChange={setIsIncident}
+          {/* <Select 
+            label="Select an animal" 
+            className="max-w-xs" 
           >
-            Is Incident?
-          </Checkbox>
+            {subjects.map((subject) => (
+              <SelectItem key={subject.value} value={subject.value}>
+                {subject.label}
+              </SelectItem>
+            ))}
+          </Select> */}
+          <Radio.Group orientation="horizontal" label="subjects" color="primary" defaultValue={subjects[0].value} >
+            {subjects.map((subject) => (
+              < Radio value={subject.value} color="primary">
+                {subject.label}
+              </Radio>
+            ))}
+          </Radio.Group>
           <Input
             {...titleBindings}
             bordered

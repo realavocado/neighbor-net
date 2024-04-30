@@ -18,4 +18,5 @@ export default interface FeedItem {
   address?: ItemLocation;
   eventTime?: number;
   eventType: string;
+  replyMessages?: FeedItem[];
 }
