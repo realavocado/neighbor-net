@@ -20,6 +20,8 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
+import Cookies from 'js-cookie';
+import Request from "@/api/request";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { HiEye, HiEyeOff } from "react-icons/hi";
 import { MdEmail, MdLock } from "react-icons/md";
@@ -296,6 +298,47 @@ interface LoginModalProps {
   visible: boolean;
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
+
+function fetchAndStoreCsrfToken() {
+  fetch('http://127.0.0.1:8000/users/set_csrf_token/', {
+    method: 'GET',
+    credentials: 'include'
+  })
+  .then(response => {
+    console.log('CSRF token fetched and stored');
+  })
+  .catch(error => {
+    console.error('Error in fetching CSRF token:', error);
+  });
+  // Request.get('users/set_csrf_token/')
+  //   .then(response => {
+  //     //const csrfToken = response.data.csrfToken;
+  //     //setCookie('x-csrftoken', csrfToken, 7);  // store CSRF token to localStorage
+  //     console.log('CSRF token fetched and stored');
+  //   })
+  //   .catch(error => {
+  //     console.error('Error in fetching CSRF token:', error);
+  //   });
+}
+
+function getCsrfToken() {
+  const cookies = document.cookie.split(';');
+  console.log(cookies);
+  
+  for (let i = 0; i < cookies.length; i++) {
+    const cookie = cookies[i].trim();
+    const cookieParts = cookie.split('=');
+
+    console.log(cookies[i]);
+
+    // if (cookieParts[0] === 'csrftoken') {
+    //   return cookieParts[1];
+    // }
+  }
+
+  return null;
+}
+
 function LoginModal(props: LoginModalProps) {
   const closeHandler = () => {
     props.setVisible(false);
@@ -339,17 +382,60 @@ function LoginModal(props: LoginModalProps) {
   }, [passwordValue]);
 
   const loginHandler = () => {
+    //let csrftoken = getCsrfToken();
     setLoading(true);
-    auth
-      .signInWithEmailAndPassword(emailValue, passwordValue)
-      .then((_item: any) => {
-        setLoading(false);
-        closeHandler();
-      })
-      .catch((error: any) => {
-        alert(error);
-      });
+
+    let csrftoken = Cookies.get('csrftoken');
+
+    if (!csrftoken) {
+      fetchAndStoreCsrfToken();
+      csrftoken = Cookies.get('csrftoken');
+    }
+
+    fetch('http://127.0.0.1:8000/users/login/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-csrftoken': csrftoken
+      },
+      credentials: 'include',/** */
+      body: JSON.stringify({ email: emailValue, password: passwordValue })
+    })
+    .then(data => {
+      setLoading(false);
+      closeHandler();
+
+    })
+    .catch(error => {
+      setLoading(false);
+      console.error('Login failed:', error);
+      alert('Login failed: ' + error.message);
+    });
+
+
+
+    // const headers = {
+    //   'Content-Type': 'application/json',
+    //   'x-csrftoken': csrftoken
+    // };
+
+    // Request.post('users/login/', {
+    //   email: emailValue,
+    //   password: passwordValue
+    // }, {
+    //   headers: headers
+    // })
+    // .then(() => {
+    //   setLoading(false);
+    //   closeHandler();
+    // })
+    // .catch(error => {
+    //   setLoading(false);
+    //   console.error('Login failed:', error);
+    //   alert('Login failed: ' + error.message);
+    // });
   };
+
 
   const [loading, setLoading] = useState(false);
 

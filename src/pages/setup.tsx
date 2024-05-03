@@ -14,7 +14,8 @@ import React, { useState } from "react";
 import { HiEye, HiEyeOff } from "react-icons/hi";
 import { MdEmail, MdLock, MdPerson } from "react-icons/md";
 import { useRouter } from "next/router";
-import { set } from '@nandorojo/swr-firestore'
+import { set } from '@nandorojo/swr-firestore';
+import axios from 'axios';
 
 export default function Feed() {
   const router = useRouter();
@@ -72,18 +73,36 @@ export default function Feed() {
     };
   }, [passwordValue]);
 
+  // const loginHandler = () => {
+  //   setLoading(true);
+  //   auth
+  //     .createUserWithEmailAndPassword(emailValue, passwordValue)
+  //     .then((item: { user: { uid: string; }; }) => {
+  //       if (item.user?.uid) {
+  //         uploadUserData(item.user?.uid)
+  //       }
+  //     })
+  //     .catch((error: any) => {
+  //       alert(error);
+  //     });
+  // };
+
   const loginHandler = () => {
     setLoading(true);
-    auth
-      .createUserWithEmailAndPassword(emailValue, passwordValue)
-      .then((item) => {
-        if (item.user?.uid) {
-          uploadUserData(item.user?.uid)
-        }
-      })
-      .catch((error) => {
-        alert(error);
-      });
+    axios.post('http://127.0.0.1:8000/users/login/', {
+      username: emailValue,
+      password: passwordValue,
+    })
+    .then((response: { data: any; }) => {
+      console.log('User logged in:', response.data);
+      router.push('/feed');
+    })
+    .catch((error: { message: any; }) => {
+      alert(error.message);
+    })
+    .finally(() => {
+      setLoading(false);
+    });
   };
 
   function uploadUserData(uid: string) {
