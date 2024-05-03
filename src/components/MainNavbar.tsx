@@ -331,9 +331,9 @@ function getCsrfToken() {
 
     console.log(cookies[i]);
 
-    // if (cookieParts[0] === 'csrftoken') {
-    //   return cookieParts[1];
-    // }
+    if (cookieParts[0] === 'csrftoken') {
+      return cookieParts[1];
+    }
   }
 
   return null;
@@ -382,14 +382,13 @@ function LoginModal(props: LoginModalProps) {
   }, [passwordValue]);
 
   const loginHandler = () => {
-    //let csrftoken = getCsrfToken();
     setLoading(true);
 
-    let csrftoken = Cookies.get('csrftoken');
+    let csrftoken = getCsrfToken();
 
     if (!csrftoken) {
       fetchAndStoreCsrfToken();
-      csrftoken = Cookies.get('csrftoken');
+      csrftoken = getCsrfToken() || '';
     }
 
     fetch('http://127.0.0.1:8000/users/login/', {
