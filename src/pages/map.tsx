@@ -6,12 +6,25 @@ import { Button, Container, Navbar, Text, Spacer } from "@nextui-org/react";
 import "mapbox-gl/dist/mapbox-gl.css";
 //import "./styles/Home.module.css";
 import { useEffect, useRef, useState } from "react";
-import { Switch, useTheme } from '@nextui-org/react'
+import { Switch, useTheme } from '@nextui-org/react';
+import axios from 'axios';
 
 
 
 export default function Feed() {
   
+  const [testMessage, setTestMessage] = useState("Hello World");
+
+    useEffect(() => {
+      axios.get('http://127.0.0.1:8000/message/test/')
+        .then(response => {
+          setTestMessage(response.data);
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    }, []);
+
   return (
     <>
       <Head>
@@ -20,6 +33,7 @@ export default function Feed() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      <Text h1>{testMessage}</Text>
       <main>
         <NewMapboxMap />
       </main>
