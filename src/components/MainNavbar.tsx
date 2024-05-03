@@ -20,7 +20,6 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
-import Cookies from 'js-cookie';
 import { useAuthState } from "react-firebase-hooks/auth";
 import { HiEye, HiEyeOff } from "react-icons/hi";
 import { MdEmail, MdLock } from "react-icons/md";
