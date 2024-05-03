@@ -21,7 +21,6 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import Cookies from 'js-cookie';
-import Request from "@/api/request";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { HiEye, HiEyeOff } from "react-icons/hi";
 import { MdEmail, MdLock } from "react-icons/md";
@@ -299,45 +298,6 @@ interface LoginModalProps {
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-function fetchAndStoreCsrfToken() {
-  fetch('http://127.0.0.1:8000/users/set_csrf_token/', {
-    method: 'GET',
-    credentials: 'include'
-  })
-  .then(response => {
-    console.log('CSRF token fetched and stored');
-  })
-  .catch(error => {
-    console.error('Error in fetching CSRF token:', error);
-  });
-  // Request.get('users/set_csrf_token/')
-  //   .then(response => {
-  //     //const csrfToken = response.data.csrfToken;
-  //     //setCookie('x-csrftoken', csrfToken, 7);  // store CSRF token to localStorage
-  //     console.log('CSRF token fetched and stored');
-  //   })
-  //   .catch(error => {
-  //     console.error('Error in fetching CSRF token:', error);
-  //   });
-}
-
-function getCsrfToken() {
-  const cookies = document.cookie.split(';');
-  console.log(cookies);
-  
-  for (let i = 0; i < cookies.length; i++) {
-    const cookie = cookies[i].trim();
-    const cookieParts = cookie.split('=');
-
-    console.log(cookies[i]);
-
-    if (cookieParts[0] === 'csrftoken') {
-      return cookieParts[1];
-    }
-  }
-
-  return null;
-}
 
 function LoginModal(props: LoginModalProps) {
   const closeHandler = () => {
@@ -381,37 +341,82 @@ function LoginModal(props: LoginModalProps) {
     };
   }, [passwordValue]);
 
-  const loginHandler = () => {
-    setLoading(true);
-
-    let csrftoken = getCsrfToken();
-
-    if (!csrftoken) {
-      fetchAndStoreCsrfToken();
-      csrftoken = getCsrfToken() || '';
+  function fetchAndStoreCsrfToken() {
+    return fetch('http://127.0.0.1:8000/users/set_csrf_token/', {
+      method: 'GET',
+      credentials: 'include'
+    })
+    .then(response => {
+      console.log('CSRF token fetched and stored');
+    })
+    .catch(error => {
+      console.error('Error in fetching CSRF token:', error);
+    });
+    // Request.get('users/set_csrf_token/')
+    //   .then(response => {
+    //     //const csrfToken = response.data.csrfToken;
+    //     //setCookie('x-csrftoken', csrfToken, 7);  // store CSRF token to localStorage
+    //     console.log('CSRF token fetched and stored');
+    //   })
+    //   .catch(error => {
+    //     console.error('Error in fetching CSRF token:', error);
+    //   });
+  }
+  
+  function getCsrfToken() {
+    const cookies = document.cookie.split(';');
+    //console.log(cookies);
+    
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      const cookieParts = cookie.split('=');
+      //console.log(cookies[i]);
+      if (cookieParts[0] === 'csrftoken') {
+        return cookieParts[1];
+      }
     }
+  
+    return null;
+  }
 
+  function performLogin(csrftoken: any) {
     fetch('http://127.0.0.1:8000/users/login/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-csrftoken': csrftoken
+        'x-csrftoken': csrftoken || ''
       },
-      credentials: 'include',/** */
+      credentials: 'include',
       body: JSON.stringify({ email: emailValue, password: passwordValue })
     })
     .then(data => {
+      console.log('login request');
       setLoading(false);
       closeHandler();
-
     })
     .catch(error => {
       setLoading(false);
       console.error('Login failed:', error);
       alert('Login failed: ' + error.message);
     });
+  }
 
+  const loginHandler = () => {
+    setLoading(true);
 
+    let csrftoken = getCsrfToken();
+
+    if (!csrftoken) {
+      fetchAndStoreCsrfToken()
+      .then(() => {
+        csrftoken = getCsrfToken() || '';
+        console.log('token set');
+        performLogin(csrftoken);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    }
 
     // const headers = {
     //   'Content-Type': 'application/json',
