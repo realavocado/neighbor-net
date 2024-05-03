@@ -43,7 +43,7 @@ export default function FeedCard(props: FeedCardInterface) {
   }
 
   function removePost() {
-    db.doc(`feed/${props.id}`).delete();
+    // db.doc(`feed/${props.id}`).delete();
   }
 
 
@@ -147,15 +147,6 @@ export default function FeedCard(props: FeedCardInterface) {
           </Container>
         </Card.Body>
         <Card.Divider />
-        {props.item.replyMessages?(
-          <Collapse.Group accordion={false}>
-          {props.item.replyMessages.map((reply) => (
-            <Collapse title={reply.title} subtitle={reply.author.fullName}>
-              <Text>{reply.description}</Text>
-            </Collapse>
-          ))}
-          </Collapse.Group>
-        ): null}
         <Card.Footer>
           <Row align="center" justify="space-between">
             <Row>
@@ -164,18 +155,6 @@ export default function FeedCard(props: FeedCardInterface) {
                 {convertDate(props.item.creationDate)}
               </Text>
             </Row>
-            { props.item.visibility?
-            (<Button flat auto rounded color="secondary">
-                  <Text
-                    css={{ color: "inherit" }}
-                    size={12}
-                    weight="bold"
-                    transform="uppercase"
-                  >
-                    {props.item.visibility}
-                  </Text>
-            </Button>)
-            :null}
           </Row>
         </Card.Footer>
       </Card>

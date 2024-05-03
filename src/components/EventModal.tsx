@@ -1,5 +1,5 @@
 import { auth } from "@/pages/_app";
-import FeedItem from "@/types/FeedItem";
+import ThreadItem from "@/types/FeedItem";
 import User from "@/types/User";
 import { useDocument } from "@nandorojo/swr-firestore";
 import {
@@ -23,7 +23,7 @@ import { AddressAutofill, config } from "@mapbox/search-js-react";
 
 interface EventModalProps {
   open: boolean;
-  add: (data: FeedItem | FeedItem[]) => Promise<void> | null;
+  add: (data: ThreadItem | ThreadItem[]) => Promise<void> | null;
   close: () => void;
 }
 
@@ -41,35 +41,35 @@ export default function EventModal(props: EventModalProps) {
   } = useDocument<User>(`users/${auth.currentUser?.uid}`);
 
   function uploadDocument() {
-    props
-      .add({
-        creationDate: Date.now(),
-        title: titleValue,
-        description: descriptionValue,
-        authorId: auth.currentUser!.uid,
-        author: {
-          fullName: userData!.fullName,
-          avatarUrl: userData?.avatarUrl,
-        },
-        address:
-          locationValue != ""
-            ? {
-                latitude: latitude,
-                longitude: longitude,
-                streetAddress: locationValue,
-                city: city,
-                country: country,
-              }
-            : undefined,
-        eventType: isIncident ? "incident" : "regular",
-      })
-      ?.then(() => {
-        props.close();
-        resetFields()
-        setTimeout(function () {
-          setDisableSubmit(false);
-        }, 750);
-      });
+    // props
+    //   .add({
+    //     creationDate: Date.now(),
+    //     title: titleValue,
+    //     description: descriptionValue,
+    //     authorId: auth.currentUser!.uid,
+    //     author: {
+    //       fullName: userData!.fullName,
+    //       avatarUrl: userData?.avatarUrl,
+    //     },
+    //     address:
+    //       locationValue != ""
+    //         ? {
+    //             latitude: latitude,
+    //             longitude: longitude,
+    //             streetAddress: locationValue,
+    //             city: city,
+    //             country: country,
+    //           }
+    //         : undefined,
+    //     eventType: isIncident ? "incident" : "regular",
+    //   })
+    //   ?.then(() => {
+    //     props.close();
+    //     resetFields()
+    //     setTimeout(function () {
+    //       setDisableSubmit(false);
+    //     }, 750);
+    //   });
   }
 
   const [isIncident, setIsIncident] = useState(true);

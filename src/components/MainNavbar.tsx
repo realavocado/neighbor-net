@@ -1,6 +1,5 @@
 import MainLogo from "@/components/MainLogo";
 import { auth } from "@/pages/_app";
-import FeedItem from "@/types/FeedItem";
 import User from "@/types/User";
 import { useCollection, useDocument } from "@nandorojo/swr-firestore";
 import {

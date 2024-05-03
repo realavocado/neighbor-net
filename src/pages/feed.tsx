@@ -1,14 +1,14 @@
-import FeedCard from "@/components/FeedCard";
+import ThreadCard from "@/components/ThreadCard";
 import { auth } from "@/pages/_app";
-import FeedItem from "@/types/FeedItem";
+import { ThreadItem, ReplyItem } from "@/types/FeedItem";
 import { useCollection } from "@nandorojo/swr-firestore";
 import { Container, Spacer, Text } from "@nextui-org/react";
 import axios from "axios";
 import dynamic from "next/dynamic";
 import Head from "next/head";
-import React from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { baseApiUrl, getCsrfToken } from "@/api/Utils";
+import React, { useState } from "react";
+// import { useAuthState } from "react-firebase-hooks/auth";
+import { baseApiUrl, getCsrfToken, IsUserExist } from "@/api/Utils";
 
 const DynamicComponentWithNoSSR = dynamic(
   () => import("@/components/EventModal"),
@@ -16,48 +16,50 @@ const DynamicComponentWithNoSSR = dynamic(
 );
 
 export default function Feed() {
-  const [user] = useAuthState(auth);
-  const {
-    data: feedList,
-    add,
-    error: feedListError,
-    isValidating,
-    mutate,
-  } = useCollection<FeedItem>("feed", {
-    orderBy: ["creationDate", "desc"],
-    listen: true,
-  });
-  console.log('add', add);
-  // const [feedList, setFeedList] = React.useState<FeedItem[]>([]); // FeedItem[]
+  // const [user] = useAuthState(auth);
+  const [user] = React.useState(IsUserExist());
+
+  function add(data: ThreadItem | ThreadItem[]) {
+    return null;
+  }
+  
+  const [threadList, setThreadList] = React.useState<ThreadItem[]>([]); // FeedItem[]
 
   // get visible message data
-  // function getVisableMessages() {
-  //   axios.get(baseApiUrl + "/message/get_message/",
-  //     {
-  //       headers: {
-  //         'x-csrftoken': getCsrfToken(),
-  //       },
-  //       withCredentials: true
-  //     }
-  //   )
-  //       .then((response) => {
-  //         console.log(response.data);
-  //         const fdList: FeedItem[] = [];
-  //         for (let i = 0; i < response.data.message.length; i++) {
-  //           const fd: FeedItem = { 
-  //             eventType: response.data.message[i].eventType,
-  //             creationDate: response.data.message[i].creationDate,
-  //             title: response.data.message[i].title,
-  //             description: response.data.message[i].description,
-  //             authorId: response.data.message[i].authorId,
-  //             replyMessages:[],
-  //           };
-  //           fdList.push(fd);
-  //         }
-  //         setFeedList(fdList);
-  //       }
-  //     )
-  // }
+  function getVisableMessages() {
+    axios.get(baseApiUrl + "/message/get_message/",
+      {
+        headers: {
+          'x-csrftoken': getCsrfToken(),
+        },
+        withCredentials: true
+      }
+    )
+        .then((response) => {
+          console.log(response.data);
+          const tdList: ThreadItem[] = [];
+          for (let i = 0; i < response.data.message.length; i++) {
+            const td: ThreadItem = { 
+              id: response.data.message[i].tid,
+              topic: response.data.message[i].topic,
+              subject: response.data.message[i].subject,
+              visibility: response.data.message[i].visibility,
+              mid: response.data.message[i].mid,
+              title: response.data.message[i].title,
+              text: response.data.message[i].text,
+              authorId: response.data.message[i].authorId,
+              authorName: response.data.message[i].author,
+              eventTime: response.data.message[i].timestamp,
+              latitude: response.data.message[i].latitude,
+              longitude: response.data.message[i].longitude,
+              replyMessages:[],
+            };
+            tdList.push(td);
+          }
+          setThreadList(tdList);
+        }
+      )
+  }
 
   // Popup
   const [visible, setVisible] = React.useState(false);
@@ -73,9 +75,9 @@ export default function Feed() {
   //   console.log(`Loading State ${isValidating}`);
   // }
 
-  // React.useEffect(() => {
-  //   getVisableMessages();
-  // }, []);
+  React.useEffect(() => {
+    getVisableMessages();
+  }, []);
 
   return (
     <>
@@ -103,19 +105,22 @@ export default function Feed() {
               </Text>
             )}
             <Spacer y={1} />
-            {feedList ? (
-              feedList.map((item) => {
+            {threadList ? (
+              threadList.map((item) => {
                 return (
-                  <FeedCard
+                  <ThreadCard
                     key={item.id}
                     id={item.id}
-                    item={{
-                      creationDate: item.creationDate,
+                    item = {{
+                      id: item.id,
+                      topic: item.topic,
+                      visibility: item.visibility,
+                      eventTime: item.eventTime,
                       title: item.title,
-                      description: item.description,
+                      text: item.text,
                       authorId: item.authorId,
-                      author: item.author,
-                      eventType: item.eventType,
+                      authorName: item.authorName,
+                      subject: item.subject,
                       imageUrl: item.imageUrl,
                       replyMessages: item.replyMessages,
                     }}
