@@ -8,21 +8,41 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { useEffect, useRef, useState } from "react";
 import { Switch, useTheme } from '@nextui-org/react';
 import axios from 'axios';
-
-
+import {baseApiUrl, getCsrfToken} from '@/api/Utils';
+import { get } from "http";
 
 export default function Feed() {
   
   const [testMessage, setTestMessage] = useState("Hello World");
 
     useEffect(() => {
-      axios.get('http://127.0.0.1:8000/message/test/')
-        .then(response => {
-          setTestMessage(response.data);
-        })
-        .catch(error => {
+      // axios.get('http://127.0.0.1:8000/message/get_message/')
+      //   .then(response => {
+      //     console.log(response.data);
+      //     setTestMessage(response.data.message[0].mid);
+      //   })
+      //   .catch(error => {
+      //     console.log(error);
+      //   });
+      // let csrftoken = getCsrfToken();
+      // console.log(csrftoken);
+      axios.post(baseApiUrl + '/message/post_message/',
+        {
+          "content": "Hello from NextJS"
+        },
+        {
+          headers: {
+            'x-csrftoken': getCsrfToken(),
+          },
+          withCredentials: true
+        }
+      ).then(response => {
+          console.log(response.data);
+          // setTestMessage(response.data);
+        }).catch(error => {
           console.log(error);
-        });
+        }
+      )
     }, []);
 
   return (

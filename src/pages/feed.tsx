@@ -3,10 +3,12 @@ import { auth } from "@/pages/_app";
 import FeedItem from "@/types/FeedItem";
 import { useCollection } from "@nandorojo/swr-firestore";
 import { Container, Spacer, Text } from "@nextui-org/react";
+import axios from "axios";
 import dynamic from "next/dynamic";
 import Head from "next/head";
 import React from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { baseApiUrl, getCsrfToken } from "@/api/Utils";
 
 const DynamicComponentWithNoSSR = dynamic(
   () => import("@/components/EventModal"),
@@ -25,6 +27,37 @@ export default function Feed() {
     orderBy: ["creationDate", "desc"],
     listen: true,
   });
+  console.log('add', add);
+  // const [feedList, setFeedList] = React.useState<FeedItem[]>([]); // FeedItem[]
+
+  // get visible message data
+  // function getVisableMessages() {
+  //   axios.get(baseApiUrl + "/message/get_message/",
+  //     {
+  //       headers: {
+  //         'x-csrftoken': getCsrfToken(),
+  //       },
+  //       withCredentials: true
+  //     }
+  //   )
+  //       .then((response) => {
+  //         console.log(response.data);
+  //         const fdList: FeedItem[] = [];
+  //         for (let i = 0; i < response.data.message.length; i++) {
+  //           const fd: FeedItem = { 
+  //             eventType: response.data.message[i].eventType,
+  //             creationDate: response.data.message[i].creationDate,
+  //             title: response.data.message[i].title,
+  //             description: response.data.message[i].description,
+  //             authorId: response.data.message[i].authorId,
+  //             replyMessages:[],
+  //           };
+  //           fdList.push(fd);
+  //         }
+  //         setFeedList(fdList);
+  //       }
+  //     )
+  // }
 
   // Popup
   const [visible, setVisible] = React.useState(false);
@@ -35,10 +68,14 @@ export default function Feed() {
     console.log("closed");
   };
 
-  function test() {
-    console.log("OnSuccess Triggered");
-    console.log(`Loading State ${isValidating}`);
-  }
+  // function test() {
+  //   console.log("OnSuccess Triggered");
+  //   console.log(`Loading State ${isValidating}`);
+  // }
+
+  // React.useEffect(() => {
+  //   getVisableMessages();
+  // }, []);
 
   return (
     <>

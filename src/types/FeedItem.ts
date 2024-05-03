@@ -9,15 +9,16 @@ export interface ItemLocation {
 }
 
 export default interface FeedItem {
-  creationDate: number;
-  title: string;
-  description: string;
-  authorId: string;
-  author: User;
+  creationDate?: number;
+  title?: string;
+  description?: string;
+  authorId?: string;
+  author?: User;
   imageUrl?: string;
   address?: ItemLocation;
   eventTime?: number;
   eventType: string;
   replyMessages?: FeedItem[];
   visibility?: string;
+  id?: string;
 }
