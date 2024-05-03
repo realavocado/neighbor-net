@@ -1,5 +1,5 @@
 import { auth } from "@/pages/_app";
-import ThreadItem from "@/types/FeedItem";
+import { ThreadItem }from "@/types/FeedItem";
 import User from "@/types/User";
 import { useDocument } from "@nandorojo/swr-firestore";
 import {

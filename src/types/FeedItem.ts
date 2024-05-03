@@ -21,15 +21,16 @@ export default interface FeedItem {
 }
 
 export interface ReplyItem {
-  mid?: string;
+  mid: string;
   authorId?: string;
-  authorName?: string;
+  authorName: string;
   title?: string;
   text?: string;
   eventTime?: string;
   imageUrl?: string;
   latitude?: number;
   longitude?: number;
+  replyUsername?: string;
 }
 
 export interface ThreadItem {

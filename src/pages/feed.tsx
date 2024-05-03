@@ -9,6 +9,7 @@ import Head from "next/head";
 import React, { useState } from "react";
 // import { useAuthState } from "react-firebase-hooks/auth";
 import { baseApiUrl, getCsrfToken, IsUserExist } from "@/api/Utils";
+import { time } from "console";
 
 const DynamicComponentWithNoSSR = dynamic(
   () => import("@/components/EventModal"),
@@ -39,6 +40,27 @@ export default function Feed() {
           console.log(response.data);
           const tdList: ThreadItem[] = [];
           for (let i = 0; i < response.data.message.length; i++) {
+            // get reply messages
+            let reply: ReplyItem[] = [];
+            const replylist = JSON.parse(response.data.message[i].related_messages);
+            console.log('rl',replylist);
+            
+            for(let j = 0; j < replylist.length; j++) {
+              const rm: ReplyItem = {
+                mid: replylist[j].mid,
+                title: replylist[j].title,
+                text: replylist[j].text,
+                authorId: replylist[j].author_id,
+                authorName: replylist[j].author,
+                eventTime: replylist[j].timestamp,
+                // imageUrl: replylist[j].imageUrl,
+                latitude: replylist[j].latitude,
+                longitude: replylist[j].longitude,
+                replyUsername: replylist[j].reply_to_username,
+              };
+              reply.push(rm);
+            }
+
             const td: ThreadItem = { 
               id: response.data.message[i].tid,
               topic: response.data.message[i].topic,
@@ -52,10 +74,11 @@ export default function Feed() {
               eventTime: response.data.message[i].timestamp,
               latitude: response.data.message[i].latitude,
               longitude: response.data.message[i].longitude,
-              replyMessages:[],
+              replyMessages: reply,
             };
             tdList.push(td);
           }
+          console.log(tdList);
           setThreadList(tdList);
         }
       )
@@ -111,19 +134,7 @@ export default function Feed() {
                   <ThreadCard
                     key={item.id}
                     id={item.id}
-                    item = {{
-                      id: item.id,
-                      topic: item.topic,
-                      visibility: item.visibility,
-                      eventTime: item.eventTime,
-                      title: item.title,
-                      text: item.text,
-                      authorId: item.authorId,
-                      authorName: item.authorName,
-                      subject: item.subject,
-                      imageUrl: item.imageUrl,
-                      replyMessages: item.replyMessages,
-                    }}
+                    item = {item}
                   />
                 );
               })
