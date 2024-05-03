@@ -416,28 +416,9 @@ function LoginModal(props: LoginModalProps) {
       .catch(error => {
         console.error('Error:', error);
       });
+    } else {
+      performLogin(csrftoken);
     }
-
-    // const headers = {
-    //   'Content-Type': 'application/json',
-    //   'x-csrftoken': csrftoken
-    // };
-
-    // Request.post('users/login/', {
-    //   email: emailValue,
-    //   password: passwordValue
-    // }, {
-    //   headers: headers
-    // })
-    // .then(() => {
-    //   setLoading(false);
-    //   closeHandler();
-    // })
-    // .catch(error => {
-    //   setLoading(false);
-    //   console.error('Login failed:', error);
-    //   alert('Login failed: ' + error.message);
-    // });
   };
 
 
