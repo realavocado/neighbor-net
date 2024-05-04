@@ -57,7 +57,7 @@ export default function ThreadCard(props: ThreadCardInterface) {
             <UserProfile
               fullName={props.item.authorName}
               avatarUrl={props.item.imageUrl}
-            ></UserProfile>
+            />
             <div style={{ display: "flex", flexDirection: "row" }}>
               {props.item.subject ? (
                 <Button flat auto rounded color="warning">
@@ -115,33 +115,16 @@ export default function ThreadCard(props: ThreadCardInterface) {
               <></>
             )}
             <Container gap={0}>
-              {props.item.imageUrl ? (
-                <Row gap={0}>
-                  <Col>
-                    <Image
-                      objectFit="cover"
-                      css={{ borderRadius: "15px" }}
-                      src={props.item.imageUrl}
-                      alt="Default Image"
-                    />
-                  </Col>
-                  <Spacer y={1} />
-                  <Col>
-                    <Text>{props.item.text}</Text>
-                  </Col>
-                </Row>
-              ) : (
-                <Text>{props.item.text}</Text>
-              )}
+              <Text>{props.item.text}</Text>
             </Container>
-            <Spacer y={0.4} />
-          </Container>
-          <Container>
             <MapInFeed
               latitude={props.item.latitude ?? 0}
               longitude={props.item.longitude ?? 0}
             />
           </Container>
+          {/* <Container> */}
+
+          {/* </Container> */}
         </Card.Body>
         <Card.Divider />
         {props.item.replyMessages?.length ? (

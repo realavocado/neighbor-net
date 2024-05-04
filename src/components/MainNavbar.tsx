@@ -90,6 +90,9 @@ export default function MainNavbar() {
         <Link href={"/map"} passHref legacyBehavior>
           <Navbar.Link isActive={router.pathname == "/map"}>Map</Navbar.Link>
         </Link>
+        <Link href={"/rela"} passHref legacyBehavior>
+          <Navbar.Link isActive={router.pathname == "/rela"}>Neighbor & Friend</Navbar.Link>
+        </Link>
         <Link href={"/request"} passHref legacyBehavior>
           <Navbar.Link isActive={router.pathname == "/request"}>Request</Navbar.Link>
         </Link>
@@ -279,6 +282,11 @@ export default function MainNavbar() {
         <Navbar.CollapseItem key={"map"}>
           <Link color="inherit" href="/map">
             Map
+          </Link>
+        </Navbar.CollapseItem>
+        <Navbar.CollapseItem key={"rela"}>
+          <Link color="inherit" href="/rela">
+          Neighbor & Friend
           </Link>
         </Navbar.CollapseItem>
         <Navbar.CollapseItem key={"request"}>

@@ -14,16 +14,17 @@ export default function MapInFeed(props: MapInFeedInterface) {
   const token =
     "pk.eyJ1IjoibGVvc20wNyIsImEiOiJjbGVicjdueHgxMmoxM25xZ2JqZWVkbTFjIn0.nv1GEej-EtMR1ouVUYVM_w";
   const height = typeof window === 'undefined' ? 100 : window.innerHeight;
+  const width = typeof window === 'undefined' ? 100 : window.innerWidth;
 
   return (
-    <>
+    
       <Map
         initialViewState={{
           longitude: props.longitude,
           latitude: props.latitude,
           zoom: 16,
         }}
-        // style={{ width: "100%", height: "50hv"}}
+        style={{ width: "100%", height: "100%", overflow: "hidden"}}
         mapStyle={
           isDark
             ? "mapbox://styles/mapbox/dark-v11"
@@ -44,6 +45,6 @@ export default function MapInFeed(props: MapInFeedInterface) {
         >
         </Marker>
       </Map>
-    </>
+    
   );
 }

@@ -1,22 +1,38 @@
 import RequestCard from "@/components/RequestCard";
 import Head from "next/head";
-import MapboxMap from "@/components/MapboxMap";
-import NewMapboxMap from "@/components/NewMapboxMap";
-import MainNavbar from "@/components/MainNavbar";
-import { Button, Container, Navbar, Text, Spacer } from "@nextui-org/react";
+import { Button, Container, Text, Spacer } from "@nextui-org/react";
 import "mapbox-gl/dist/mapbox-gl.css";
-//import "./styles/Home.module.css";
-import { useEffect, useRef, useState } from "react";
-import { Switch, useTheme } from '@nextui-org/react'
+import axios from "axios";
+import { baseApiUrl, getCsrfToken } from "@/api/Utils";
+import React from "react";
 
+interface FriendRequest {
+  id: string;
+  username: string;
+  avatar?: string;
+}
 
+export default function Request() {
 
-export default function Feed() {
+  const [friendRequests, setFriendRequests] = React.useState<FriendRequest[]>([]);
+  const [joinBlockRequests, setJoinBlockRequests] = React.useState<FriendRequest[]>([]);
 
-  const testData = [
-    {type: "joinBlock", username: "John Doe"},
-    {type: "Friend", username: "Sam"},
-  ];
+  function getFriendsRequest() {
+    axios.get(baseApiUrl + "/userrela/get_friend_request").then((response) => {
+      console.log(response.data);
+      const frs: FriendRequest[] = [];
+      for (let i = 0; i < response.data.requests.length; i++) {
+        const fr: FriendRequest = {
+          id: response.data.requests[i].id,
+          username: response.data.requests[i].username,
+          avatar: response.data.requests[i].image_url,
+        };
+        frs.push(fr);
+      }
+      setFriendRequests(frs);
+    });
+  }
+
 
   function handleRequestAccept() {
     console.log("Request Accepted");
@@ -25,6 +41,10 @@ export default function Feed() {
   function handleRequestReject() {
     console.log("Request Rejected");
   }
+
+  React.useEffect(() => {
+    getFriendsRequest();
+  }, []);
   
   return (
     <>
@@ -35,21 +55,25 @@ export default function Feed() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <Container sm>
-          <Text h2>Join in block Request</Text>
-
-          {testData.map((data) => 
+      <Container sm>
+          <Spacer y={1} />
+          <Text h2>Add Friend Request</Text>
+          {friendRequests.map((rq) => 
             (
               <>
                 <RequestCard 
-                  username={data.username}
-                  type={data.type}
+                  username={rq.username}
+                  type="Friend"
                   onRequestAccept={handleRequestAccept}
                   onRequestReject={handleRequestReject}/>
                 <Spacer y={1} />
               </>
             )
           )}
+        </Container>
+        <Container sm>
+          <Spacer y={1} />
+          <Text h2>Join in block Request</Text>
         </Container>
       </main>
     </>
