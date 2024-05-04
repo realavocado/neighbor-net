@@ -18,7 +18,7 @@ const DynamicComponentWithNoSSR = dynamic(
 
 export default function Feed() {
   // const [user] = useAuthState(auth);
-  const [user] = React.useState(IsUserExist());
+  const [user] = React.useState(true);
 
   function add(data: ThreadItem | ThreadItem[]) {
     return null;
@@ -53,7 +53,7 @@ export default function Feed() {
                 authorId: replylist[j].author_id,
                 authorName: replylist[j].author,
                 eventTime: replylist[j].timestamp,
-                // imageUrl: replylist[j].imageUrl,
+                imageUrl: replylist[j].image_url,
                 latitude: replylist[j].latitude,
                 longitude: replylist[j].longitude,
                 replyUsername: replylist[j].reply_to_username,
@@ -71,6 +71,7 @@ export default function Feed() {
               text: response.data.message[i].text,
               authorId: response.data.message[i].authorId,
               authorName: response.data.message[i].author,
+              imageUrl: response.data.message[i].image_url,
               eventTime: response.data.message[i].timestamp,
               latitude: response.data.message[i].latitude,
               longitude: response.data.message[i].longitude,
@@ -139,7 +140,7 @@ export default function Feed() {
                 );
               })
             ) : (
-              <Text>test</Text>
+              <></>
             )}
           </Container>
         </div>
