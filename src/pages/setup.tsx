@@ -15,10 +15,14 @@ import { HiEye, HiEyeOff } from "react-icons/hi";
 import { MdEmail, MdLock, MdPerson } from "react-icons/md";
 import { useRouter } from "next/router";
 import { set } from '@nandorojo/swr-firestore';
+import { Modal } from '@nextui-org/react';
 import axios from 'axios';
 
 export default function Feed() {
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+
   const router = useRouter();
+
   const {
     value: nameValue,
     reset: resetNameField,
@@ -129,15 +133,6 @@ export default function Feed() {
     .catch(error => {
       console.error('Error in fetching CSRF token:', error);
     });
-    // Request.get('users/set_csrf_token/')
-    //   .then(response => {
-    //     //const csrfToken = response.data.csrfToken;
-    //     //setCookie('x-csrftoken', csrfToken, 7);  // store CSRF token to localStorage
-    //     console.log('CSRF token fetched and stored');
-    //   })
-    //   .catch(error => {
-    //     console.error('Error in fetching CSRF token:', error);
-    //   });
   }
   
   function getCsrfToken() {
@@ -174,9 +169,17 @@ export default function Feed() {
       credentials: 'include',
       body: formData
     })
-    .then(data => {
-      console.log('Register request');
+    .then(response => {
       setLoading(false);
+      if (response.ok) {
+        setShowSuccessMessage(true);
+        setTimeout(() => {
+          setShowSuccessMessage(false);
+          router.push('/');
+        }, 3000);
+      } else {
+        throw new Error('Failed to register');
+      }
     })
     .catch(error => {
       setLoading(false);
@@ -362,6 +365,11 @@ export default function Feed() {
           </Container>
         </div>
       </main>
+      <Modal open={showSuccessMessage} onClose={() => setShowSuccessMessage(false)}>
+        <Modal.Body>
+          <Text>Registration Successful!</Text>
+        </Modal.Body>
+      </Modal>
     </>
   );
 }
