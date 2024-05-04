@@ -8,12 +8,14 @@ import RelaCard from "@/components/RelaCard";
 interface Friend {
   id: string;
   username: string;
+  fullName?: string;
   avatar?: string;
 }
 
 interface Neighbor {
   id: string;
   username: string;
+  fullName?: string;
   avatar?: string;
 }
 
@@ -36,6 +38,7 @@ export default function Rela() {
           const friend: Friend = {
             id: response.data.friends[i].id,
             username: response.data.friends[i].username,
+            fullName: response.data.friends[i].full_name,
             avatar: response.data.friends[i].image_url,
           };
           friends.push(friend);
@@ -59,6 +62,7 @@ export default function Rela() {
           const neighbor: Neighbor = {
             id: response.data.neighbors[i].id,
             username: response.data.neighbors[i].username,
+            fullName: response.data.neighbors[i].full_name,
             avatar: response.data.neighbors[i].image_url,
           };
           neighbors.push(neighbor);

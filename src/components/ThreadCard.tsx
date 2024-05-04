@@ -23,13 +23,18 @@ import { ThreadItem } from "@/types/FeedItem";
 import { auth } from "@/pages/_app";
 import MapInFeed from "./MapInFeed";
 import RepliesCard from "./RepliesCard";
+import MessageModal from "./MessageModal";
+import React from "react";
 
 interface ThreadCardInterface {
   id: string;
   item: ThreadItem;
+  getMess: () => void;
 }
 
 export default function ThreadCard(props: ThreadCardInterface) {
+  const [messVisible, setMessVisible] = React.useState(false);
+
   function convertDate(input: string | undefined): string {
     const date = new Date(input ?? 0);
     return `${date.toLocaleDateString("en-us", {
@@ -44,7 +49,7 @@ export default function ThreadCard(props: ThreadCardInterface) {
   }
 
   function addPost() {
-    // db.doc(`feed/${props.id}`).delete();
+    setMessVisible(true);
   }
 
   // console.log(props.item.replyMessages);
@@ -156,6 +161,13 @@ export default function ThreadCard(props: ThreadCardInterface) {
           </Row>
         </Card.Footer>
       </Card>
+      <MessageModal
+        visible={messVisible}
+        setVisible={setMessVisible}
+        tid={props.item.id}
+        reply_mid={props.item.mid}
+        update={props.getMess}
+      />
       <Spacer y={1} />
     </>
   );

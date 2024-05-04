@@ -18,8 +18,24 @@ import {
   Container,
   Dropdown
 } from "@nextui-org/react";
-import { useCallback, useEffect, useState } from "react";
+import { use, useCallback, useEffect, useMemo, useState } from "react";
 import { AddressAutofill, config } from "@mapbox/search-js-react";
+import axios from "axios";
+import { baseApiUrl, getCsrfToken } from "@/api/Utils";
+
+interface Friend {
+  id: string;
+  username: string;
+  fullName?: string;
+  avatar?: string;
+}
+
+interface Neighbor {
+  id: string;
+  username: string;
+  fullName?: string;
+  avatar?: string;
+}
 
 interface EventModalProps {
   open: boolean;
@@ -28,51 +44,6 @@ interface EventModalProps {
 }
 
 export default function EventModal(props: EventModalProps) {
-  function handleSubmit() {
-    setDisableSubmit(true);
-    setTimeout(function () {
-      uploadDocument();
-    }, 250);
-  }
-  const {
-    data: userData,
-    update: updateUserData,
-    error: userDataError,
-  } = useDocument<User>(`users/${auth.currentUser?.uid}`);
-
-  function uploadDocument() {
-    // props
-    //   .add({
-    //     creationDate: Date.now(),
-    //     title: titleValue,
-    //     description: descriptionValue,
-    //     authorId: auth.currentUser!.uid,
-    //     author: {
-    //       fullName: userData!.fullName,
-    //       avatarUrl: userData?.avatarUrl,
-    //     },
-    //     address:
-    //       locationValue != ""
-    //         ? {
-    //             latitude: latitude,
-    //             longitude: longitude,
-    //             streetAddress: locationValue,
-    //             city: city,
-    //             country: country,
-    //           }
-    //         : undefined,
-    //     eventType: isIncident ? "incident" : "regular",
-    //   })
-    //   ?.then(() => {
-    //     props.close();
-    //     resetFields()
-    //     setTimeout(function () {
-    //       setDisableSubmit(false);
-    //     }, 750);
-    //   });
-  }
-
-  const [isIncident, setIsIncident] = useState(true);
 
   const [disableSubmit, setDisableSubmit] = useState(false);
 
@@ -119,13 +90,9 @@ export default function EventModal(props: EventModalProps) {
   const token =
     "pk.eyJ1IjoibGVvc20wNyIsImEiOiJjbGVicjdueHgxMmoxM25xZ2JqZWVkbTFjIn0.nv1GEej-EtMR1ouVUYVM_w";
 
-  useEffect(() => {
-    config.accessToken = token;
-  }, []);
-
   const handleRetrieve = useCallback(
     (res: any) => {
-      console.log(res.features[0].properties);
+      // console.log(res.features[0].properties);
       setLocationValue(res.features[0].properties.feature_name);
       setLatitude(res.features[0].geometry.coordinates[1]);
       setLongitude(res.features[0].geometry.coordinates[0]);
@@ -150,31 +117,74 @@ export default function EventModal(props: EventModalProps) {
   const subjects = [
     { value: "Incident", label: "Incident" },
     { value: "Regular", label: "Regular" },
-    { value: "Lost Pet", label: "Lost Pet" },
     { value: "Event", label: "Event" },
     { value: "Other", label: "Other" },
   ];
 
   const recepients = [
-    { label: "All Block", value: "Block" },
-    { label: "All Neigborhood", value: "Hood" },
-    { label: "All Friends", value: "Friends" },
-    { label: "All Neighbors", value: "Neighbors" },
-    { label: "A Friend", value: "Friend" },
-    { label: "A Neighbor", value: "Neighbor" },
+    { label: "All Block", value: "block" },
+    { label: "All Neigborhood", value: "neighborhood" },
+    { label: "All Friends", value: "friends" },
+    { label: "A Friend", value: "friend" },
+    { label: "A Neighbor", value: "neighbor" },
   ];
 
-  const friends_t = [
-    { id: "1", name: "John Doe" },
-    { id: "2", name: "Jane Doe" },
-    { id: "3", name: "Sam Smith" },
-  ];
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [neighbors, setNeighbors] = useState<Neighbor[]>([]);
 
-  const neighbors_t = [
-    { id: "1", name: "John Doe" },
-    { id: "2", name: "Jane Doe" },
-    { id: "3", name: "Sam Smith" },
-  ];
+
+  function getFriends() {
+    axios
+      .get(baseApiUrl + "/userrela/friends", {
+        headers: {
+          "x-csrftoken": getCsrfToken(),
+        },
+        withCredentials: true,
+      })
+      .then((response) => {
+        const friends: Friend[] = [];
+        for (let i = 0; i < response.data.friends.length; i++) {
+          const friend: Friend = {
+            id: response.data.friends[i].id,
+            username: response.data.friends[i].username,
+            fullName: response.data.friends[i].full_name,
+            avatar: response.data.friends[i].image_url,
+          };
+          friends.push(friend);
+        }
+        setFriends(friends);
+      });
+  }
+
+  function getNeighbors() {
+    axios
+      .get(baseApiUrl + "/userrela/neighbors", {
+        headers: {
+          "x-csrftoken": getCsrfToken(),
+        },
+        withCredentials: true,
+      })
+      .then((response) => {
+        const neighbors: Neighbor[] = [];
+        for (let i = 0; i < response.data.neighbors.length; i++) {
+          const neighbor: Neighbor = {
+            id: response.data.neighbors[i].id,
+            username: response.data.neighbors[i].username,
+            fullName: response.data.neighbors[i].full_name,
+            avatar: response.data.neighbors[i].image_url,
+          };
+          neighbors.push(neighbor);
+        }
+        setNeighbors(neighbors);
+      });
+  }
+
+
+  useEffect(() => {
+    config.accessToken = token;
+    getFriends();
+    getNeighbors();
+  }, []);
 
   const [selectedSubject, setSelectedSubject] = useState(subjects[0].value);
   const [recipientType, setRecipientType] = useState(recepients[0].value);
@@ -192,24 +202,64 @@ export default function EventModal(props: EventModalProps) {
     setSelectedFriend(''); // Reset friend selection
   };
 
+  const handleSubmit = () => {
+    axios.post(
+      baseApiUrl + "/message/post_thread/",
+      {
+        subject: selectedSubject,
+        visibility: recipientType,
+        reciever: selectedFriend || selectedNeighbor,
+        
+        title: titleValue,
+        text: descriptionValue,
+        latitude: latitude,
+        longitude: longitude,
+        date: dateValue,
+        time: timeValue,
+      },
+      {
+        headers: {
+          "x-csrftoken": getCsrfToken(),
+        },
+        withCredentials: true,
+      }
+    )
+    .then((response) => {
+      console.log(response.data);
+    }).catch((error) => {
+      console.log(error);
+      // alert('Error posting thread');
+    });
+
+    console.log('selectedSubject',selectedSubject)
+    console.log('recipientType',recipientType)
+    console.log('selectedFriend',selectedFriend)
+    console.log('selectedNeighbor',selectedNeighbor)
+    console.log('titleValue',titleValue)
+    console.log('descriptionValue',descriptionValue)
+    console.log('locationValue',locationValue)
+    console.log('latitude',latitude)
+    console.log('longitude',longitude)
+    console.log('dateValue',dateValue)
+    console.log('timeValue',timeValue)
+  }
+
+  function fd_username(id: string) {
+    for (let i = 0; i < friends.length; i++) {
+      if (friends[i].id === id) {
+        return friends[i].username;
+      }
+    }
+  }
+
   return (
     <Collapse.Group bordered>
       <Collapse title={"New Thread"}>
         <Container>
-          {/* <Select 
-            label="Select an animal" 
-            className="max-w-xs" 
-          >
-            {subjects.map((subject) => (
-              <SelectItem key={subject.value} value={subject.value}>
-                {subject.label}
-              </SelectItem>
-            ))}
-          </Select> */}
           <Radio.Group orientation="horizontal" label="subjects" 
           color="primary" 
-          value={recipientType}
-          onChange = {setRecipientType}>
+          value={selectedSubject}
+          onChange = {setSelectedSubject}>
             {subjects.map((subject) => (
               <Radio value={subject.value} color="primary" size="sm">
                 {subject.label}
@@ -230,7 +280,7 @@ export default function EventModal(props: EventModalProps) {
           </Radio.Group>
 
 
-          {recipientType === 'Friend'? (
+          {recipientType === 'friend'? (
             <>
               <Dropdown>
               <Dropdown.Button flat color="primary" css={{ tt: "capitalize" }}>
@@ -244,15 +294,15 @@ export default function EventModal(props: EventModalProps) {
                 selectedKeys={selectedFriend}
                 onSelectionChange={handleFriendChange}
               >
-                {friends_t.map((friend) => (
-                  <Dropdown.Item key={friend.name}>
-                    {friend.name}
+                {friends.map((friend) => (
+                  <Dropdown.Item key={friend.username}>
+                    {friend.username}
                   </Dropdown.Item>
                 ))}
               </Dropdown.Menu>
             </Dropdown>
             </>
-          ): recipientType === 'Neighbor'?(
+          ): recipientType === 'neighbor'?(
             <Dropdown>
               <Dropdown.Button flat color="primary" css={{ tt: "capitalize" }}>
                 {selectedNeighbor ? selectedNeighbor : "Select Neighbor"}
@@ -265,9 +315,9 @@ export default function EventModal(props: EventModalProps) {
                 selectedKeys={selectedNeighbor}
                 onSelectionChange={handleNeighborChange}
               >
-                {neighbors_t.map((neighbor) => (
-                  <Dropdown.Item key={neighbor.name}>
-                    {neighbor.name}
+                {neighbors.map((neighbor) => (
+                  <Dropdown.Item key={neighbor.username}>
+                    {neighbor.username}
                   </Dropdown.Item>
                 ))}
               </Dropdown.Menu>
@@ -324,7 +374,7 @@ export default function EventModal(props: EventModalProps) {
           <Spacer y={1} />
           <Button
             disabled={
-              titleValue.length < 4 ||
+              titleValue.length < 3 ||
               descriptionValue.length < 4 ||
               locationValue.length < 3 ||
               disableSubmit
