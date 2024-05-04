@@ -22,35 +22,49 @@ export default function Rela() {
   const [neighbors, setNeighbors] = React.useState<Neighbor[]>([]);
 
   function getFriends() {
-    axios.get(baseApiUrl + "/userrela/friends").then((response) => {
-      console.log(response.data);
-      const friends: Friend[] = [];
-      for (let i = 0; i < response.data.friends.length; i++) {
-        const friend: Friend = {
-          id: response.data.friends[i].id,
-          username: response.data.friends[i].username,
-          avatar: response.data.friends[i].image_url,
-        };
-        friends.push(friend);
-      }
-      setFriends(friends);
-    });
+    axios
+      .get(baseApiUrl + "/userrela/friends", {
+        headers: {
+          "x-csrftoken": getCsrfToken(),
+        },
+        withCredentials: true,
+      })
+      .then((response) => {
+        console.log(response.data);
+        const friends: Friend[] = [];
+        for (let i = 0; i < response.data.friends.length; i++) {
+          const friend: Friend = {
+            id: response.data.friends[i].id,
+            username: response.data.friends[i].username,
+            avatar: response.data.friends[i].image_url,
+          };
+          friends.push(friend);
+        }
+        setFriends(friends);
+      });
   }
 
   function getNeighbors() {
-    axios.get(baseApiUrl + "/userrela/neighbors").then((response) => {
-      console.log(response.data);
-      const neighbors: Neighbor[] = [];
-      for (let i = 0; i < response.data.neighbors.length; i++) {
-        const neighbor: Neighbor = {
-          id: response.data.neighbors[i].id,
-          username: response.data.neighbors[i].username,
-          avatar: response.data.neighbors[i].image_url,
-        };
-        neighbors.push(neighbor);
-      }
-      setNeighbors(neighbors);
-    });
+    axios
+      .get(baseApiUrl + "/userrela/neighbors", {
+        headers: {
+          "x-csrftoken": getCsrfToken(),
+        },
+        withCredentials: true,
+      })
+      .then((response) => {
+        console.log(response.data);
+        const neighbors: Neighbor[] = [];
+        for (let i = 0; i < response.data.neighbors.length; i++) {
+          const neighbor: Neighbor = {
+            id: response.data.neighbors[i].id,
+            username: response.data.neighbors[i].username,
+            avatar: response.data.neighbors[i].image_url,
+          };
+          neighbors.push(neighbor);
+        }
+        setNeighbors(neighbors);
+      });
   }
 
   React.useEffect(() => {
@@ -72,6 +86,7 @@ export default function Rela() {
           <Text h2>Your Friends</Text>
           <RelaCard rela={friends} />
         </Container>
+        <Spacer y={1} />
         <Container sm>
           <Text h2>Your Follow Neighbors</Text>
           <RelaCard rela={neighbors} />
