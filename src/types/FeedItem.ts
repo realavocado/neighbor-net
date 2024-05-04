@@ -39,6 +39,7 @@ export interface ThreadItem {
   topic: string;
   subject: string;
   visibility: string;
+  isWrite: boolean;
   // first message
   mid?: string;
   title?: string;

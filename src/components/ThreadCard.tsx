@@ -43,7 +43,7 @@ export default function ThreadCard(props: ThreadCardInterface) {
     })}`;
   }
 
-  function removePost() {
+  function addPost() {
     // db.doc(`feed/${props.id}`).delete();
   }
 
@@ -74,7 +74,7 @@ export default function ThreadCard(props: ThreadCardInterface) {
                 <div></div>
               )}
 
-              {auth.currentUser?.uid == props.item.authorId ? (
+              {props.item.isWrite ? (
                 <Dropdown>
                   <Dropdown.Button light>
                     <BsFillPencilFill />
@@ -82,15 +82,12 @@ export default function ThreadCard(props: ThreadCardInterface) {
                   <Dropdown.Menu
                     aria-label="Static Actions"
                     onAction={(actionKey) => {
-                      if (actionKey.toString() == "delete") {
-                        removePost();
+                      if (actionKey.toString() == "add") {
+                        addPost();
                       }
                     }}
                   >
-                    <Dropdown.Item key="edit">Edit Post</Dropdown.Item>
-                    <Dropdown.Item key="delete" withDivider color="error">
-                      Delete Post
-                    </Dropdown.Item>
+                    <Dropdown.Item key="add">Add Post</Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
               ) : (
