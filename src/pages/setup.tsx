@@ -178,13 +178,17 @@ export default function Feed() {
           router.push('/');
         }, 3000);
       } else {
-        throw new Error('Failed to register');
+        return response.json().then(data => {
+          // response body: {"errors" : xxxxx}
+          const errorMessage = data.errors || "Failed to register";
+          throw new Error(errorMessage);
+        });
       }
     })
     .catch(error => {
       setLoading(false);
       console.error('Register failed:', error);
-      alert('Register failed: ' + error.message);
+      alert('Register failed:\n' + error.message);
     });
   }
 
