@@ -378,14 +378,18 @@ function LoginModal(props: LoginModalProps) {
   }
 
   function performLogin(csrftoken: any) {
+    const formData = new FormData();
+    formData.append('username', emailValue);
+    formData.append('password', passwordValue);
+    
     fetch('http://127.0.0.1:8000/users/login/', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        //'Content-Type': 'application/json',
         'x-csrftoken': csrftoken || ''
       },
       credentials: 'include',
-      body: JSON.stringify({ email: emailValue, password: passwordValue })
+      body: formData
     })
     .then(data => {
       console.log('login request');

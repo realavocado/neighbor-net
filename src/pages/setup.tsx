@@ -200,6 +200,23 @@ export default function Feed() {
               contentLeft={<MdLock />}
             />
             <Spacer y={2.25} />
+            <Input.Password
+              {...passwordBindings}
+              clearable
+              bordered
+              fullWidth
+              shadow={false}
+              onClearClick={resetPasswordField}
+              aria-label="Password Field"
+              color="primary"
+              labelPlaceholder="Confirm Password"
+              helperText={passwordHelper.text}
+              helperColor="error"
+              visibleIcon={<HiEyeOff fill="currentColor" />}
+              hiddenIcon={<HiEye fill="currentColor" />}
+              contentLeft={<MdLock />}
+            />
+            <Spacer y={2.25} />
             <Row justify="center">
               <Button shadow disabled={!inputsValid()} onPress={loginHandler}>
                 {loading ? (
