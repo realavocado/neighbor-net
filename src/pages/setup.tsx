@@ -25,6 +25,17 @@ export default function Feed() {
     bindings: nameBindings,
   } = useInput("");
 
+  const {
+    value: firstNameValue,
+    reset: resetFirstNameField,
+    bindings: firstNameBindings,
+  } = useInput("");
+
+  const {
+    value: lastNameValue,
+    reset: resetLastNameField,
+    bindings: lastNameBindings,
+  } = useInput("");
 
   const {
     value: emailValue,
@@ -36,6 +47,12 @@ export default function Feed() {
     value: passwordValue,
     reset: resetPasswordField,
     bindings: passwordBindings,
+  } = useInput("");
+
+  const {
+    value: passwordConfirmValue,
+    reset: resetPasswordConfirmField,
+    bindings: passwordConfirmBindings,
   } = useInput("");
   
   const validateEmail = (value: string) => {
@@ -64,6 +81,24 @@ export default function Feed() {
     };
   }, [nameValue]);
 
+  const firstNameHelper = React.useMemo(() => {
+    return {
+      text:
+        firstNameValue.length >= 3 || firstNameValue.length == 0
+          ? ""
+          : "Must be at least 3 characters",
+    };
+  }, [firstNameValue]);
+
+  const lastNameHelper = React.useMemo(() => {
+    return {
+      text:
+        lastNameValue.length >= 3 || lastNameValue.length == 0
+          ? ""
+          : "Must be at least 3 characters",
+    };
+  }, [lastNameValue]);
+
   const passwordHelper = React.useMemo(() => {
     return {
       text:
@@ -73,37 +108,103 @@ export default function Feed() {
     };
   }, [passwordValue]);
 
-  // const loginHandler = () => {
-  //   setLoading(true);
-  //   auth
-  //     .createUserWithEmailAndPassword(emailValue, passwordValue)
-  //     .then((item: { user: { uid: string; }; }) => {
-  //       if (item.user?.uid) {
-  //         uploadUserData(item.user?.uid)
-  //       }
-  //     })
-  //     .catch((error: any) => {
-  //       alert(error);
-  //     });
-  // };
+  const passwordConfirmHelper = React.useMemo(() => {
+    return {
+      text:
+        passwordConfirmValue.length >= 6 || passwordConfirmValue.length == 0
+          ? ""
+          : "Must be at least 6 characters",
+    };
+  }, [passwordConfirmValue]);
 
-  const loginHandler = () => {
-    setLoading(true);
-    axios.post('http://127.0.0.1:8000/users/login/', {
-      username: emailValue,
-      password: passwordValue,
+
+  function fetchAndStoreCsrfToken() {
+    return fetch('http://127.0.0.1:8000/users/set_csrf_token/', {
+      method: 'GET',
+      credentials: 'include'
     })
-    .then((response: { data: any; }) => {
-      console.log('User logged in:', response.data);
-      router.push('/feed');
+    .then(response => {
+      console.log('CSRF token fetched and stored');
     })
-    .catch((error: { message: any; }) => {
-      alert(error.message);
-    })
-    .finally(() => {
-      setLoading(false);
+    .catch(error => {
+      console.error('Error in fetching CSRF token:', error);
     });
+    // Request.get('users/set_csrf_token/')
+    //   .then(response => {
+    //     //const csrfToken = response.data.csrfToken;
+    //     //setCookie('x-csrftoken', csrfToken, 7);  // store CSRF token to localStorage
+    //     console.log('CSRF token fetched and stored');
+    //   })
+    //   .catch(error => {
+    //     console.error('Error in fetching CSRF token:', error);
+    //   });
+  }
+  
+  function getCsrfToken() {
+    const cookies = document.cookie.split(';');
+    //console.log(cookies);
+    
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      const cookieParts = cookie.split('=');
+      //console.log(cookies[i]);
+      if (cookieParts[0] === 'csrftoken') {
+        return cookieParts[1];
+      }
+    }
+  
+    return null;
+  }
+
+  function performRegister(csrftoken: any) {
+    const formData = new FormData();
+    formData.append('username', nameValue);
+    formData.append('first_name', firstNameValue);
+    formData.append('last_name', lastNameValue);
+    formData.append('email', emailValue);
+    formData.append('password1', passwordValue);
+    formData.append('password2', passwordConfirmValue);
+
+    fetch('http://127.0.0.1:8000/users/register/', {
+      method: 'POST',
+      headers: {
+        //'Content-Type': 'application/json',
+        'x-csrftoken': csrftoken || ''
+      },
+      credentials: 'include',
+      body: formData
+    })
+    .then(data => {
+      console.log('Register request');
+      setLoading(false);
+    })
+    .catch(error => {
+      setLoading(false);
+      console.error('Register failed:', error);
+      alert('Register failed: ' + error.message);
+    });
+  }
+
+  const registerHandler = () => {
+    setLoading(true);
+
+    let csrftoken = getCsrfToken();
+
+    if (!csrftoken) {
+      fetchAndStoreCsrfToken()
+      .then(() => {
+        csrftoken = getCsrfToken() || '';
+        console.log('token set');
+        performRegister(csrftoken);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    } else {
+      performRegister(csrftoken);
+    }
   };
+
 
   function uploadUserData(uid: string) {
     set(`users/${auth.currentUser?.uid}`, {
@@ -162,7 +263,39 @@ export default function Feed() {
               helperColor={"error"}
               helperText={nameHelper.text}
               type="email"
-              labelPlaceholder="Name"
+              labelPlaceholder="User Name"
+              contentLeft={<MdPerson />}
+              aria-label="Name Field"
+            />
+            <Spacer y={2.25} />
+            <Input
+              {...firstNameBindings}
+              clearable
+              bordered
+              fullWidth
+              shadow={false}
+              onClearClick={resetFirstNameField}
+              color={"primary"}
+              helperColor={"error"}
+              helperText={firstNameHelper.text}
+              type="email"
+              labelPlaceholder="First Name"
+              contentLeft={<MdPerson />}
+              aria-label="Name Field"
+            />
+            <Spacer y={2.25} />
+            <Input
+              {...lastNameBindings}
+              clearable
+              bordered
+              fullWidth
+              shadow={false}
+              onClearClick={resetLastNameField}
+              color={"primary"}
+              helperColor={"error"}
+              helperText={lastNameHelper.text}
+              type="email"
+              labelPlaceholder="Last Name"
               contentLeft={<MdPerson />}
               aria-label="Name Field"
             />
@@ -195,30 +328,30 @@ export default function Feed() {
               labelPlaceholder="Password"
               helperText={passwordHelper.text}
               helperColor="error"
-              visibleIcon={<HiEyeOff fill="currentColor" />}
-              hiddenIcon={<HiEye fill="currentColor" />}
+              visibleIcon={<HiEye fill="currentColor" />}
+              hiddenIcon={<HiEyeOff fill="currentColor" />}
               contentLeft={<MdLock />}
             />
             <Spacer y={2.25} />
             <Input.Password
-              {...passwordBindings}
+              {...passwordConfirmBindings}
               clearable
               bordered
               fullWidth
               shadow={false}
-              onClearClick={resetPasswordField}
+              onClearClick={resetPasswordConfirmField}
               aria-label="Password Field"
               color="primary"
               labelPlaceholder="Confirm Password"
-              helperText={passwordHelper.text}
+              helperText={passwordConfirmHelper.text}
               helperColor="error"
-              visibleIcon={<HiEyeOff fill="currentColor" />}
-              hiddenIcon={<HiEye fill="currentColor" />}
+              visibleIcon={<HiEye fill="currentColor" />}
+              hiddenIcon={<HiEyeOff fill="currentColor" />}
               contentLeft={<MdLock />}
             />
             <Spacer y={2.25} />
             <Row justify="center">
-              <Button shadow disabled={!inputsValid()} onPress={loginHandler}>
+              <Button shadow disabled={!inputsValid()} onPress={registerHandler}>
                 {loading ? (
                   <Loading type="default" color="currentColor" size="sm" />
                 ) : (
