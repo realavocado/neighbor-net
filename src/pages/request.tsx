@@ -5,122 +5,226 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import axios from "axios";
 import { baseApiUrl, getCsrfToken } from "@/api/Utils";
 import React from "react";
+import BlockCard from "@/components/BlockCard";
+import { useSSR } from "@nextui-org/react";
 
-interface FriendRequest {
+interface Request {
   id: string;
   username: string;
   avatar?: string;
 }
 
-export default function Request() {
 
-  const [friendRequests, setFriendRequests] = React.useState<FriendRequest[]>([]);
-  const [joinBlockRequests, setJoinBlockRequests] = React.useState<FriendRequest[]>([]);
+export default function Request() {
+  const { isBrowser } = useSSR();
+  const [friendRequests, setFriendRequests] = React.useState<Request[]>(
+    []
+  );
+  const [joinBlockRequests, setJoinBlockRequests] = React.useState<
+    Request[]
+  >([]);
 
   function getFriendsRequest() {
-    axios.get(baseApiUrl + "/userrela/get_friend_request"
-    , {
-      headers: {
-        "x-csrftoken": getCsrfToken(),
-      },
-      withCredentials: true,
-    }
-    ).then((response) => {
-      console.log(response.data);
-      const frs: FriendRequest[] = [];
-      for (let i = 0; i < response.data.requests.length; i++) {
-        const fr: FriendRequest = {
-          id: response.data.requests[i].id,
-          username: response.data.requests[i].username,
-          avatar: response.data.requests[i].image_url,
-        };
-        frs.push(fr);
-      }
-      setFriendRequests(frs);
-    });
+    axios
+      .get(baseApiUrl + "/userrela/get_friend_request", {
+        headers: {
+          "x-csrftoken": getCsrfToken(),
+        },
+        withCredentials: true,
+      })
+      .then((response) => {
+        console.log(response.data);
+        const frs: Request[] = [];
+        for (let i = 0; i < response.data.requests.length; i++) {
+          const fr: Request = {
+            id: response.data.requests[i].id,
+            username: response.data.requests[i].username,
+            avatar: response.data.requests[i].image_url,
+          };
+          frs.push(fr);
+        }
+        setFriendRequests(frs);
+      });
   }
 
+  function getJoinBlockRequest() {
+    axios
+      .get(baseApiUrl + "/blockrela/get_block_requests", {
+        headers: {
+          "x-csrftoken": getCsrfToken(),
+        },
+        withCredentials: true,
+      })
+      .then((response) => {
+        console.log(response.data);
+        const jbrs: Request[] = [];
+        for (let i = 0; i < response.data.requests.length; i++) {
+          const jbr: Request = {
+            id: response.data.requests[i].id,
+            username: response.data.requests[i].username,
+            avatar: response.data.requests[i].image_url,
+          };
+          jbrs.push(jbr);
+        }
+        setJoinBlockRequests(jbrs);
+      });
+  }
+      
 
   function handleFriendAccept(id: string) {
     console.log("Request Accepted");
-    axios.post(baseApiUrl + "/userrela/accept_friend/", {
-      id: id,
-    }, {
-      headers: {
-        "x-csrftoken": getCsrfToken(),
-      },
-      withCredentials: true,
-    }).then((response) => {
-      console.log(response.data);
-      if (response.data.status === "success") {
-        getFriendsRequest();
-        alert("Request Accepted");
-        return
-      }
-    }).catch((error) => {
-      console.log(error);
-      alert(error.response.data.message);
-    });
+    axios
+      .post(
+        baseApiUrl + "/userrela/accept_friend/",
+        {
+          id: id,
+        },
+        {
+          headers: {
+            "x-csrftoken": getCsrfToken(),
+          },
+          withCredentials: true,
+        }
+      )
+      .then((response) => {
+        console.log(response.data);
+        if (response.data.status === "success") {
+          getFriendsRequest();
+          alert("Request Accepted");
+          return;
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        alert(error.response.data.message);
+      });
   }
 
   function handleFriendReject(id: string) {
     console.log("Request Rejected");
-    axios.post(baseApiUrl + "/userrela/reject_friend/", {
-      id: id,
-    }, {
-      headers: {
-        "x-csrftoken": getCsrfToken(),
-      },
-      withCredentials: true,
-    }).then((response) => {
-      console.log(response.data);
-      if (response.data.status === "success") {
-        getFriendsRequest();
-        alert("Request Rejected");
-        return
-      }
-    }).catch((error) => {
-      console.log(error);
-      alert(error.response.data.message);
-    });
+    axios
+      .post(
+        baseApiUrl + "/userrela/reject_friend/",
+        {
+          id: id,
+        },
+        {
+          headers: {
+            "x-csrftoken": getCsrfToken(),
+          },
+          withCredentials: true,
+        }
+      )
+      .then((response) => {
+        console.log(response.data);
+        if (response.data.status === "success") {
+          getFriendsRequest();
+          alert("Request Rejected");
+          return;
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        alert(error.response.data.message);
+      });
   }
+
+  function handleBlockAccept(id: string) {
+    console.log("Request Accepted");
+    axios
+      .post(
+        baseApiUrl + "/blockrela/approve_block_request/",
+        {
+          id: id,
+        },
+        {
+          headers: {
+            "x-csrftoken": getCsrfToken(),
+          },
+          withCredentials: true,
+        }
+      )
+      .then((response) => {
+        console.log(response.data);
+        if (response.data.status === "success") {
+          getJoinBlockRequest();
+          alert(response.data.message);
+          return;
+        }
+        alert(response.data.message);
+        return;
+      })
+      .catch((error) => {
+        console.log(error);
+        alert(error.response.data.message);
+      });
+  }
+
+  const handleBlockReject = (id: string) => {}
 
   React.useEffect(() => {
     getFriendsRequest();
+    getJoinBlockRequest();
   }, []);
-  
+
   return (
-    <>
-      <Head>
-        <title>Map | NeighborNet</title>
-        <meta name="description" content="Generated by create next app" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <main>
-      <Container sm>
-          <Spacer y={1} />
-          <Text h2>Add Friend Request</Text>
-          {friendRequests.map((rq) => 
-            (
+    isBrowser && (
+      <>
+        <Head>
+          <title>Map | NeighborNet</title>
+          <meta name="description" content="Generated by create next app" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
+        <main>
+          <Container sm>
+            <Spacer y={1} />
+            {friendRequests.length > 0 ? (
               <>
-                <RequestCard 
-                  username={rq.username}
-                  id = {rq.id}
-                  type="Friend"
-                  onRequestAccept={handleFriendAccept}
-                  onRequestReject={handleFriendReject}/>
-                <Spacer y={1} />
+                <Text h2>Add Friend Request</Text>
+                {friendRequests.map((rq) => (
+                  <>
+                    <RequestCard
+                      username={rq.username}
+                      id={rq.id}
+                      type="Friend"
+                      onRequestAccept={handleFriendAccept}
+                      onRequestReject={handleFriendReject}
+                    />
+                    <Spacer y={1} />
+                  </>
+                ))}
               </>
-            )
-          )}
-        </Container>
-        <Container sm>
-          <Spacer y={1} />
-          <Text h2>Join in block Request</Text>
-        </Container>
-      </main>
-    </>
+            ) : (
+              <Text h3>No Friend Request</Text>
+            )}
+          </Container>
+          <Container sm>
+            <Spacer y={1} />
+            {joinBlockRequests.length > 0 ? (
+              <>
+                <Text h2>Join in block Request</Text>
+                {joinBlockRequests.map((rq) => (
+                  <>
+                    <RequestCard
+                      username={rq.username}
+                      id={rq.id}
+                      type="joinBlock"
+                      onRequestAccept={handleBlockAccept}
+                      onRequestReject={handleBlockReject}
+                    />
+                    <Spacer y={1} />
+                  </>
+                ))}
+              </> 
+            ) : (
+              <Text h3>No Join Block Request</Text>
+            )}
+            <Spacer y={3} />
+            <BlockCard />
+          </Container>
+        </main>
+      </>
+    )
   );
 }
-
