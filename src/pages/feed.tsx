@@ -127,13 +127,14 @@ export default function Feed() {
         <div>
           <Container sm>
             <Spacer y={1} />
-            <Text h1>Neighborhood Feed</Text>
+            <Text h1>Your Messages</Text>
 
             {user ? (
               <DynamicComponentWithNoSSR
                 open={visible}
                 add={add}
                 close={closeHandler}
+                update={getVisableMessages}
               />
             ) : (
               <Text h3 color="primary">
@@ -143,7 +144,7 @@ export default function Feed() {
             <Spacer y={1} />
             {threadList ? (
               threadList.map((item) => {
-                return <ThreadCard key={item.id} id={item.id} item={item} />;
+                return <ThreadCard key={item.id} id={item.id} item={item} getMess={getVisableMessages}/>;
               })
             ) : (
               <></>

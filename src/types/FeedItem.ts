@@ -41,7 +41,7 @@ export interface ThreadItem {
   visibility: string;
   isWrite: boolean;
   // first message
-  mid?: string;
+  mid: string;
   title?: string;
   text?: string;
   authorId?: string;

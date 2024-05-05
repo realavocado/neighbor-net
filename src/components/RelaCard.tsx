@@ -12,6 +12,7 @@ interface RelaTypeInterface {
 interface RelaType {
   id: string;
   username: string;
+  fullName?: string;
   avatar?: string;
 }
 
@@ -24,7 +25,11 @@ export default function RelaCard(props: RelaTypeInterface) {
   const renderCell = (user: RelaType, columnKey: React.Key) => {
     switch (columnKey) {
       case "username":
-        return <UserProfile fullName={user.username} avatarUrl={user.avatar} />;
+        return (
+          <User squared src={user?.avatar} name={user.fullName} css={{ p: 0 }}>
+            {user?.username}
+          </User>
+        );
       case "actions":
         return (
           <Row justify="center" align="center">

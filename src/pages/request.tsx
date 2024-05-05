@@ -18,7 +18,14 @@ export default function Request() {
   const [joinBlockRequests, setJoinBlockRequests] = React.useState<FriendRequest[]>([]);
 
   function getFriendsRequest() {
-    axios.get(baseApiUrl + "/userrela/get_friend_request").then((response) => {
+    axios.get(baseApiUrl + "/userrela/get_friend_request"
+    , {
+      headers: {
+        "x-csrftoken": getCsrfToken(),
+      },
+      withCredentials: true,
+    }
+    ).then((response) => {
       console.log(response.data);
       const frs: FriendRequest[] = [];
       for (let i = 0; i < response.data.requests.length; i++) {
@@ -34,12 +41,48 @@ export default function Request() {
   }
 
 
-  function handleRequestAccept() {
+  function handleFriendAccept(id: string) {
     console.log("Request Accepted");
+    axios.post(baseApiUrl + "/userrela/accept_friend/", {
+      id: id,
+    }, {
+      headers: {
+        "x-csrftoken": getCsrfToken(),
+      },
+      withCredentials: true,
+    }).then((response) => {
+      console.log(response.data);
+      if (response.data.status === "success") {
+        getFriendsRequest();
+        alert("Request Accepted");
+        return
+      }
+    }).catch((error) => {
+      console.log(error);
+      alert(error.response.data.message);
+    });
   }
 
-  function handleRequestReject() {
+  function handleFriendReject(id: string) {
     console.log("Request Rejected");
+    axios.post(baseApiUrl + "/userrela/reject_friend/", {
+      id: id,
+    }, {
+      headers: {
+        "x-csrftoken": getCsrfToken(),
+      },
+      withCredentials: true,
+    }).then((response) => {
+      console.log(response.data);
+      if (response.data.status === "success") {
+        getFriendsRequest();
+        alert("Request Rejected");
+        return
+      }
+    }).catch((error) => {
+      console.log(error);
+      alert(error.response.data.message);
+    });
   }
 
   React.useEffect(() => {
@@ -63,9 +106,10 @@ export default function Request() {
               <>
                 <RequestCard 
                   username={rq.username}
+                  id = {rq.id}
                   type="Friend"
-                  onRequestAccept={handleRequestAccept}
-                  onRequestReject={handleRequestReject}/>
+                  onRequestAccept={handleFriendAccept}
+                  onRequestReject={handleFriendReject}/>
                 <Spacer y={1} />
               </>
             )
