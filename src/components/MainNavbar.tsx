@@ -24,8 +24,10 @@ import { HiEye, HiEyeOff } from "react-icons/hi";
 import { MdEmail, MdLock } from "react-icons/md";
 import ImageUploading, { ImageListType } from "react-images-uploading";
 import { fetchAndStoreCsrfToken, getCsrfToken, baseURL } from "@/api/Request";
+import { useSSR } from '@nextui-org/react'
 
 export default function MainNavbar() {
+  const { isBrowser } = useSSR()
   const router = useRouter();
   // For Popup
   const [profileVisible, setProfileVisible] = useState(false);
@@ -70,7 +72,7 @@ export default function MainNavbar() {
     console.log(fullName)
   }
 
-  return (
+  return isBrowser? (
     <Navbar variant={"sticky"}>
       <Navbar.Brand>
         <Navbar.Toggle showIn={"xs"} aria-label="toggle navigation" />
@@ -306,7 +308,7 @@ export default function MainNavbar() {
         </Navbar.CollapseItem>
       </Navbar.Collapse>
     </Navbar>
-  );
+  ):null;
 }
 
 interface LoginModalProps {
