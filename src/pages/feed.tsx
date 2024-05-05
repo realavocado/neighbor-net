@@ -25,7 +25,7 @@ export default function Feed() {
 
   // check if user is logged in
   function IsUserExist() {
-    axios.get(baseApiUrl + "/users/is_login", {
+    axios.get(baseApiUrl + "/users/is_logged_in", {
       headers: {
         "x-csrftoken": getCsrfToken(),
       },

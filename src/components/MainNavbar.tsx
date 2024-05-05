@@ -23,6 +23,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { HiEye, HiEyeOff } from "react-icons/hi";
 import { MdEmail, MdLock } from "react-icons/md";
 import ImageUploading, { ImageListType } from "react-images-uploading";
+import { fetchAndStoreCsrfToken, getCsrfToken, baseURL } from "@/api/Request";
 
 export default function MainNavbar() {
   const router = useRouter();
@@ -97,7 +98,11 @@ export default function MainNavbar() {
           <Navbar.Link isActive={router.pathname == "/request"}>Request</Navbar.Link>
         </Link>
       </Navbar.Content>
+
+      {/* sign in pop up window (visible after click login and before click on Sign in) */}
       <LoginModal visible={visible} setVisible={setVisible} />
+
+      {/* edit profie modal (pop up window)*/}
       <Modal
         closeButton
         aria-labelledby="modal-title"
@@ -201,11 +206,15 @@ export default function MainNavbar() {
           
         </Modal.Body>
       </Modal>
+
+      
       <Navbar.Content>
         <Dropdown placement="bottom-right">
           <Navbar.Item>
             <Row align="center">
-              {user ? (
+              {/* if user is logged in */}
+              {/* display username and avatar after login */}
+              {user ? ( 
                 <>
                   <Text b>{userData?.fullName}</Text>
                   <Spacer x={0.45} />
@@ -268,6 +277,7 @@ export default function MainNavbar() {
           </Dropdown.Menu>
         </Dropdown>
       </Navbar.Content>
+
       <Navbar.Collapse>
         <Navbar.CollapseItem key={"home"}>
           <Link color="inherit" href="/">
@@ -347,50 +357,46 @@ function LoginModal(props: LoginModalProps) {
     };
   }, [passwordValue]);
 
-  function fetchAndStoreCsrfToken() {
-    return fetch('http://127.0.0.1:8000/users/set_csrf_token/', {
-      method: 'GET',
-      credentials: 'include'
-    })
-    .then(response => {
-      console.log('CSRF token fetched and stored');
-    })
-    .catch(error => {
-      console.error('Error in fetching CSRF token:', error);
-    });
-    // Request.get('users/set_csrf_token/')
-    //   .then(response => {
-    //     //const csrfToken = response.data.csrfToken;
-    //     //setCookie('x-csrftoken', csrfToken, 7);  // store CSRF token to localStorage
-    //     console.log('CSRF token fetched and stored');
-    //   })
-    //   .catch(error => {
-    //     console.error('Error in fetching CSRF token:', error);
-    //   });
-  }
-  
-  function getCsrfToken() {
-    const cookies = document.cookie.split(';');
-    //console.log(cookies);
-    
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-      const cookieParts = cookie.split('=');
-      //console.log(cookies[i]);
-      if (cookieParts[0] === 'csrftoken') {
-        return cookieParts[1];
-      }
+
+  const loginHandler = () => {
+    setLoading(true);
+
+    let csrftoken = getCsrfToken();
+    console.log(csrftoken);
+
+    if (!csrftoken) {
+      console.log('fetch new token');
+      fetchAndStoreCsrfToken()
+      .then(() => {
+        csrftoken = getCsrfToken() || '';
+        console.log('new token: ' + csrftoken);
+        console.log('token set');
+        performLogin(csrftoken);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    } else {
+      performLogin(csrftoken);
     }
-  
-    return null;
+  };
+
+  const [loading, setLoading] = useState(false);
+
+  function inputsValid(): boolean {
+    if (emailHelper.color == "success" && passwordValue.length >= 6) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   function performLogin(csrftoken: any) {
     const formData = new FormData();
     formData.append('username', emailValue);
     formData.append('password', passwordValue);
-    
-    fetch('http://127.0.0.1:8000/users/login/', {
+
+    fetch(baseURL + 'users/login/', {
       method: 'POST',
       headers: {
         //'Content-Type': 'application/json',
@@ -409,37 +415,6 @@ function LoginModal(props: LoginModalProps) {
       console.error('Login failed:', error);
       alert('Login failed: ' + error.message);
     });
-  }
-
-  const loginHandler = () => {
-    setLoading(true);
-
-    let csrftoken = getCsrfToken();
-
-    if (!csrftoken) {
-      fetchAndStoreCsrfToken()
-      .then(() => {
-        csrftoken = getCsrfToken() || '';
-        console.log('token set');
-        performLogin(csrftoken);
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
-    } else {
-      performLogin(csrftoken);
-    }
-  };
-
-
-  const [loading, setLoading] = useState(false);
-
-  function inputsValid(): boolean {
-    if (emailHelper.color == "success" && passwordValue.length >= 6) {
-      return true;
-    } else {
-      return false;
-    }
   }
 
   return (

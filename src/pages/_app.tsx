@@ -26,12 +26,29 @@ const firebaseConfig = {
   appId: "1:682067984065:web:c8552099da349f0f059e40",
 }
 import '@/styles/globals.css'
+import {baseApiUrl, getCsrfToken} from '@/api/Utils';
+import axios from "axios";
 
 export const fuego = new Fuego(firebaseConfig)
 export const auth = fuego.auth()
 export const db = fuego.db
 
 export default function App({ Component, pageProps }: AppProps) {
+
+  function checkLoginStatus() {
+    axios.get(baseApiUrl + "/users/is_logged_in", {
+      headers: {
+        "x-csrftoken": getCsrfToken(),
+      },
+      withCredentials: true
+    }).then(response => {
+      console.log("logged in?", response);
+    }).catch(error => {
+      console.log("check login error", error);
+    })
+  }
+
+
   return (
     <SSRProvider>
       <NextThemesProvider

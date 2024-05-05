@@ -16,6 +16,7 @@ import { MdEmail, MdLock, MdPerson } from "react-icons/md";
 import { useRouter } from "next/router";
 import { set } from '@nandorojo/swr-firestore';
 import { Modal } from '@nextui-org/react';
+import { fetchAndStoreCsrfToken, getCsrfToken, baseURL } from "@/api/Request";
 import axios from 'axios';
 
 export default function Feed() {
@@ -122,35 +123,6 @@ export default function Feed() {
   }, [passwordConfirmValue]);
 
 
-  function fetchAndStoreCsrfToken() {
-    return fetch('http://127.0.0.1:8000/users/set_csrf_token/', {
-      method: 'GET',
-      credentials: 'include'
-    })
-    .then(response => {
-      console.log('CSRF token fetched and stored');
-    })
-    .catch(error => {
-      console.error('Error in fetching CSRF token:', error);
-    });
-  }
-  
-  function getCsrfToken() {
-    const cookies = document.cookie.split(';');
-    //console.log(cookies);
-    
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-      const cookieParts = cookie.split('=');
-      //console.log(cookies[i]);
-      if (cookieParts[0] === 'csrftoken') {
-        return cookieParts[1];
-      }
-    }
-  
-    return null;
-  }
-
   function performRegister(csrftoken: any) {
     const formData = new FormData();
     formData.append('username', nameValue);
@@ -160,7 +132,7 @@ export default function Feed() {
     formData.append('password1', passwordValue);
     formData.append('password2', passwordConfirmValue);
 
-    fetch('http://127.0.0.1:8000/users/register/', {
+    fetch(baseURL + 'users/register/', {
       method: 'POST',
       headers: {
         //'Content-Type': 'application/json',
