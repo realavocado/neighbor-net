@@ -1,7 +1,4 @@
-import { auth } from "@/pages/_app";
 import { ThreadItem }from "@/types/FeedItem";
-import User from "@/types/User";
-import { useDocument } from "@nandorojo/swr-firestore";
 import {
   Button,
   Col,
@@ -41,6 +38,7 @@ interface EventModalProps {
   open: boolean;
   add: (data: ThreadItem | ThreadItem[]) => Promise<void> | null;
   close: () => void;
+  update: () => void;
 }
 
 export default function EventModal(props: EventModalProps) {
@@ -226,31 +224,25 @@ export default function EventModal(props: EventModalProps) {
     )
     .then((response) => {
       console.log(response.data);
+      props.update();
     }).catch((error) => {
       console.log(error);
       // alert('Error posting thread');
     });
 
-    console.log('selectedSubject',selectedSubject)
-    console.log('recipientType',recipientType)
-    console.log('selectedFriend',selectedFriend)
-    console.log('selectedNeighbor',selectedNeighbor)
-    console.log('titleValue',titleValue)
-    console.log('descriptionValue',descriptionValue)
-    console.log('locationValue',locationValue)
-    console.log('latitude',latitude)
-    console.log('longitude',longitude)
-    console.log('dateValue',dateValue)
-    console.log('timeValue',timeValue)
+    // console.log('selectedSubject',selectedSubject)
+    // console.log('recipientType',recipientType)
+    // console.log('selectedFriend',selectedFriend)
+    // console.log('selectedNeighbor',selectedNeighbor)
+    // console.log('titleValue',titleValue)
+    // console.log('descriptionValue',descriptionValue)
+    // console.log('locationValue',locationValue)
+    // console.log('latitude',latitude)
+    // console.log('longitude',longitude)
+    // console.log('dateValue',dateValue)
+    // console.log('timeValue',timeValue)
   }
 
-  function fd_username(id: string) {
-    for (let i = 0; i < friends.length; i++) {
-      if (friends[i].id === id) {
-        return friends[i].username;
-      }
-    }
-  }
 
   return (
     <Collapse.Group bordered>

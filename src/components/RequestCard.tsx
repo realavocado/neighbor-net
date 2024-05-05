@@ -1,28 +1,39 @@
-import { Card, Button } from "@nextui-org/react";
+import { Card, Button, Row } from "@nextui-org/react";
 
 interface RequestCardInterface {
-    username: string;
-    type: string;
-    onRequestAccept: () => void;
-    onRequestReject: () => void;
+  id: string;
+  username: string;
+  type: string;
+  onRequestAccept: (id: string) => void;
+  onRequestReject: (id: string) => void;
 }
 
 export default function RequestCard(props: RequestCardInterface) {
-    return (
-      <>
-        <Card>
-          <Card.Body>
-          { props.type === "joinBlock" ? (
-            <h3>{props.username} wants to join your Block</h3>)
-            : ( props.type === "Friend" ? (
-            <h3>{props.username} wants to add you as friend</h3>
-            ): null)}
-            <Button.Group>
-              <Button onClick={props.onRequestAccept} color="default">Accept</Button>
-              <Button onClick={props.onRequestReject} color="error">Reject</Button>
-            </Button.Group>
-          </Card.Body>
-        </Card>
-      </>
-    );
+  const handleAccept = () => {
+    props.onRequestAccept(props.id);
   };
+  const handleReject = () => {
+    props.onRequestReject(props.id);
+  };
+  return (
+    <>
+      <Card>
+        <Card.Body>
+          {props.type === "joinBlock" ? (
+            <h3>{props.username} wants to join your Block</h3>
+          ) : props.type === "Friend" ? (
+            <h3>{props.username} wants to add you as friend</h3>
+          ) : null}
+          <Row>
+            <Button onPress={handleAccept} color="default">
+              Accept
+            </Button>
+            <Button onPress={handleReject} color="error">
+              Reject
+            </Button>
+          </Row>
+        </Card.Body>
+      </Card>
+    </>
+  );
+}

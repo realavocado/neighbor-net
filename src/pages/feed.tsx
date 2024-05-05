@@ -134,6 +134,7 @@ export default function Feed() {
                 open={visible}
                 add={add}
                 close={closeHandler}
+                update={getVisableMessages}
               />
             ) : (
               <Text h3 color="primary">
