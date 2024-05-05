@@ -18,14 +18,17 @@ import {
 } from "@nextui-org/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { HiEye, HiEyeOff } from "react-icons/hi";
 import { MdEmail, MdLock } from "react-icons/md";
 import ImageUploading, { ImageListType } from "react-images-uploading";
 import { fetchAndStoreCsrfToken, getCsrfToken, baseURL } from "@/api/Request";
 
+import AuthContext from "@/context/AuthContext";
+
 export default function MainNavbar() {
+
   const router = useRouter();
   // For Popup
   const [profileVisible, setProfileVisible] = useState(false);
@@ -36,11 +39,8 @@ export default function MainNavbar() {
     setProfileVisible(false);
     console.log("closed");
   };
-  const [user] = useAuthState(auth);
+  //const [user] = useAuthState(auth);
 
-  function signOut() {
-    auth.signOut();
-  }
   const {
     data: userData,
     update: updateUserData,
@@ -60,15 +60,26 @@ export default function MainNavbar() {
   };
 
   // For edit profile
-  const [address, setAddress] = useState(userData?.address || ''); // Initialize address state with userData?.address
-  const [fullName, setFullName] = useState(userData?.fullName || '');
-  const [bio, setBio] = useState(userData?.bio || '');
-  
-  function handleSubmit() {
-    console.log(userData?.fullName)
-    console.log(address)
-    console.log(fullName)
+  // const [address, setAddress] = useState(userData?.address || ''); // Initialize address state with userData?.address
+  // const [fullName, setFullName] = useState(userData?.fullName || '');
+  // const [bio, setBio] = useState(userData?.bio || '');
+
+  const userAuth = useContext(AuthContext);
+  if (!userAuth) {
+    return <p>Authentication context is not available.</p>;
   }
+  const { user, setUser, logout } = userAuth;
+
+  function signOut() {
+    userAuth?.logout();
+  }
+
+  
+  // function handleSubmit() {
+  //   console.log(userData?.fullName)
+  //   console.log(address)
+  //   console.log(fullName)
+  // }
 
   return (
     <Navbar variant={"sticky"}>
@@ -165,8 +176,8 @@ export default function MainNavbar() {
             size="lg"
             label="Username"
             // initialValue={userData?.fullName}
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
+            // value={fullName}
+            // onChange={(e) => setFullName(e.target.value)}
           />
 
           <Textarea
@@ -176,8 +187,8 @@ export default function MainNavbar() {
             size="lg"
             label="bio"
             // initialValue={userData?.bio}
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
+            // value={bio}
+            // onChange={(e) => setBio(e.target.value)}
           />
 
           <Input
@@ -187,8 +198,8 @@ export default function MainNavbar() {
             size="lg"
             label="address"
             // initialValue={userData?.address}
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
+            // value={address}
+            // onChange={(e) => setAddress(e.target.value)}
           />
 
           <Button
@@ -198,7 +209,7 @@ export default function MainNavbar() {
             //   locationValue.length < 3 ||
             //   disableSubmit
             // }
-            onPress={handleSubmit}
+            // onPress={handleSubmit}
           >
             <>Update</>
           </Button>
@@ -216,15 +227,13 @@ export default function MainNavbar() {
               {/* display username and avatar after login */}
               {user ? ( 
                 <>
-                  <Text b>{userData?.fullName}</Text>
+                  <Text b>{user.full_name}</Text>
                   <Spacer x={0.45} />
                   <Dropdown.Trigger>
                     <Avatar
                       size="md"
                       src={
-                        userData?.avatarUrl
-                          ? userData.avatarUrl
-                          : "https://i.pravatar.cc/150?u=a042581f4e29026704d"
+                          "https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png"
                       }
                     />
                   </Dropdown.Trigger>
@@ -261,7 +270,7 @@ export default function MainNavbar() {
                 Signed in as:
               </Text>
               <Text b color="inherit" css={{ d: "flex" }}>
-                {userData?.fullName}
+                {user?.email}
               </Text>
             </Dropdown.Item>
             <Dropdown.Item key="editProfile" withDivider>
@@ -357,7 +366,6 @@ function LoginModal(props: LoginModalProps) {
     };
   }, [passwordValue]);
 
-
   const loginHandler = () => {
     setLoading(true);
 
@@ -383,6 +391,18 @@ function LoginModal(props: LoginModalProps) {
 
   const [loading, setLoading] = useState(false);
 
+
+  const userAuth = useContext(AuthContext);
+  if (!userAuth) {
+    return <p>Authentication context is not available.</p>;
+  }
+  const{user, setUser} = userAuth;
+
+  function signOut() {
+    userAuth?.logout();
+  }
+
+
   function inputsValid(): boolean {
     if (emailHelper.color == "success" && passwordValue.length >= 6) {
       return true;
@@ -405,7 +425,17 @@ function LoginModal(props: LoginModalProps) {
       credentials: 'include',
       body: formData
     })
-    .then(data => {
+    .then(response => {
+      if (response.ok) { // Checks if the response status is in the 200-299 range
+        return response.json(); // Parse JSON from the response, returns a promise
+      } else {
+        throw new Error('Network response was not ok.');
+      }
+    })
+    .then(data => { // Here 'data' is the parsed JSON object
+      if (data.user) {
+        setUser(data.user as User); // Assuming 'setUser' is a function to handle the user data
+      }
       console.log('login request');
       setLoading(false);
       closeHandler();

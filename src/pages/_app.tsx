@@ -4,10 +4,12 @@ import { Analytics } from "@vercel/analytics/react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import type { AppProps } from "next/app";
 import { SSRProvider } from "react-bootstrap";
+import AuthContext, { AuthProvider } from "@/context/AuthContext";
 import 'firebase/firestore';
 import 'firebase/auth';
 import { FuegoProvider } from '@nandorojo/swr-firestore';
 import { Fuego } from '@/feugo';
+
 
 const lightTheme = createTheme({
   type: "light",
@@ -17,6 +19,9 @@ const darkTheme = createTheme({
   type: "dark",
 });
 
+
+import '@/styles/globals.css'
+
 const firebaseConfig = {
   apiKey: "AIzaSyCfYc8koO2k2n5bWZf1vbLHD5hnAnahrX4",
   authDomain: "neighbornet-64b3f.firebaseapp.com",
@@ -25,28 +30,13 @@ const firebaseConfig = {
   messagingSenderId: "682067984065",
   appId: "1:682067984065:web:c8552099da349f0f059e40",
 }
-import '@/styles/globals.css'
-import {baseApiUrl, getCsrfToken} from '@/api/Utils';
-import axios from "axios";
 
-export const fuego = new Fuego(firebaseConfig)
-export const auth = fuego.auth()
+export const fuego = new Fuego(firebaseConfig);
+export const auth = fuego.auth();
 export const db = fuego.db
 
-export default function App({ Component, pageProps }: AppProps) {
 
-  function checkLoginStatus() {
-    axios.get(baseApiUrl + "/users/is_logged_in", {
-      headers: {
-        "x-csrftoken": getCsrfToken(),
-      },
-      withCredentials: true
-    }).then(response => {
-      console.log("logged in?", response);
-    }).catch(error => {
-      console.log("check login error", error);
-    })
-  }
+export default function App({ Component, pageProps }: AppProps) {
 
 
   return (
@@ -60,13 +50,16 @@ export default function App({ Component, pageProps }: AppProps) {
         }}
       >
         <NextUIProvider>
-          <FuegoProvider fuego={fuego}>
-            <MainNavbar></MainNavbar>
-            <Component {...pageProps} />
+          <AuthProvider>
+            <FuegoProvider fuego={fuego}>
+              <MainNavbar></MainNavbar>
+              <Component {...pageProps} />
+            </FuegoProvider>
             <Analytics />
-          </FuegoProvider>
+          </AuthProvider>
         </NextUIProvider>
       </NextThemesProvider>
     </SSRProvider>
   );
 }
+

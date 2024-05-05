@@ -32,7 +32,7 @@ export default function Feed() {
       withCredentials: true,
     }).then((response) => {
       console.log(response.data);
-      setUser(response.data.is_login);
+      setUser(response.data.is_logged_in);
     }).catch((error) => {
       console.log(error);
     });
