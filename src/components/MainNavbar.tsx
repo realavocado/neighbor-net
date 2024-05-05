@@ -81,7 +81,7 @@ export default function MainNavbar() {
   //   console.log(fullName)
   // }
 
-  return (
+  return isBrowser? (
     <Navbar variant={"sticky"}>
       <Navbar.Brand>
         <Navbar.Toggle showIn={"xs"} aria-label="toggle navigation" />
@@ -315,7 +315,7 @@ export default function MainNavbar() {
         </Navbar.CollapseItem>
       </Navbar.Collapse>
     </Navbar>
-  );
+  ):null;
 }
 
 interface LoginModalProps {
