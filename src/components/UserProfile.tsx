@@ -7,8 +7,14 @@ import {
   Col,
 } from "@nextui-org/react";
 
-import User from "@/types/User";
 import { userAgent } from "next/server";
+
+interface User {
+  fullName: string;
+  bio?: string;
+  address?: string;
+  avatarUrl?: string;
+}
 
 export default function UserProfile(props: User) {
   return (
