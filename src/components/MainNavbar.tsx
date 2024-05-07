@@ -108,6 +108,9 @@ export default function MainNavbar() {
         <Link href={"/request"} passHref legacyBehavior>
           <Navbar.Link isActive={router.pathname == "/request"}>Request</Navbar.Link>
         </Link>
+        <Link href={"/search"} passHref legacyBehavior>
+          <Navbar.Link isActive={router.pathname == "/search"}>Search Message</Navbar.Link>
+        </Link>
       </Navbar.Content>
 
       {/* sign in pop up window (visible after click login and before click on Sign in) */}
