@@ -96,7 +96,7 @@ export default function Rela() {
         console.log(response.data);
         if (response.data.status === "success") {
           getNeighbors();
-          alert("Follow neighbor suucess");
+          alert("Follow neighbor success");
           return;
         }
       })

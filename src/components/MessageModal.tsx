@@ -79,6 +79,7 @@ export default function MessageModal(props: MessageModalProps) {
         console.log(response.data);
         props.update();
         closeHandler();
+        alert("Message Posted")
         // setTestMessage(response.data);
       })
       .catch((error) => {

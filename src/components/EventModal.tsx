@@ -225,9 +225,11 @@ export default function EventModal(props: EventModalProps) {
     .then((response) => {
       console.log(response.data);
       props.update();
+      alert('Thread posted successfully');
+      return;
     }).catch((error) => {
       console.log(error);
-      // alert('Error posting thread');
+      alert('Error posting thread');
     });
 
     // console.log('selectedSubject',selectedSubject)
