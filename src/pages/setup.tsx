@@ -12,7 +12,7 @@ import {
 import Head from "next/head";
 import React, { useState } from "react";
 import { HiEye, HiEyeOff } from "react-icons/hi";
-import { MdEmail, MdLock, MdPerson } from "react-icons/md";
+import { MdAddLocation, MdEmail, MdLock, MdPerson } from "react-icons/md";
 import { useRouter } from "next/router";
 import { set } from '@nandorojo/swr-firestore';
 import { Modal } from '@nextui-org/react';
@@ -49,6 +49,12 @@ export default function Feed() {
   } = useInput("");
 
   const {
+    value: addressValue,
+    reset: resetAddressField,
+    bindings: addressBindings,
+  } = useInput("");
+
+  const {
     value: passwordValue,
     reset: resetPasswordField,
     bindings: passwordBindings,
@@ -59,7 +65,7 @@ export default function Feed() {
     reset: resetPasswordConfirmField,
     bindings: passwordConfirmBindings,
   } = useInput("");
-  
+
   const validateEmail = (value: string) => {
     return value.match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,4}$/i);
   };
@@ -76,6 +82,15 @@ export default function Feed() {
       color: isValid ? "success" : "error",
     };
   }, [emailValue]);
+
+  const addressHelper = React.useMemo(() => {
+    return {
+      text:
+        addressValue.length >= 3 || addressValue.length == 0
+          ? ""
+          : "Must be at least 3 characters",
+    };
+  }, [addressValue]);
 
   const nameHelper = React.useMemo(() => {
     return {
@@ -129,6 +144,7 @@ export default function Feed() {
     formData.append('first_name', firstNameValue);
     formData.append('last_name', lastNameValue);
     formData.append('email', emailValue);
+    formData.append('address', addressValue);
     formData.append('password1', passwordValue);
     formData.append('password2', passwordConfirmValue);
     formData.append('image_url', 'https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png');
@@ -142,27 +158,27 @@ export default function Feed() {
       credentials: 'include',
       body: formData
     })
-    .then(response => {
-      setLoading(false);
-      if (response.ok) {
-        setShowSuccessMessage(true);
-        setTimeout(() => {
-          setShowSuccessMessage(false);
-          router.push('/');
-        }, 3000);
-      } else {
-        return response.json().then(data => {
-          // response body: {"errors" : xxxxx}
-          const errorMessage = data.errors || "Failed to register";
-          throw new Error(errorMessage);
-        });
-      }
-    })
-    .catch(error => {
-      setLoading(false);
-      console.error('Register failed:', error);
-      alert('Register failed:\n' + error.message);
-    });
+      .then(response => {
+        setLoading(false);
+        if (response.ok) {
+          setShowSuccessMessage(true);
+          setTimeout(() => {
+            setShowSuccessMessage(false);
+            router.push('/');
+          }, 3000);
+        } else {
+          return response.json().then(data => {
+            // response body: {"errors" : xxxxx}
+            const errorMessage = data.errors || "Failed to register";
+            throw new Error(errorMessage);
+          });
+        }
+      })
+      .catch(error => {
+        setLoading(false);
+        console.error('Register failed:', error);
+        alert('Register failed:\n' + error.message);
+      });
   }
 
   const registerHandler = () => {
@@ -172,14 +188,14 @@ export default function Feed() {
 
     if (!csrftoken) {
       fetchAndStoreCsrfToken()
-      .then(() => {
-        csrftoken = getCsrfToken() || '';
-        console.log('token set');
-        performRegister(csrftoken);
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
+        .then(() => {
+          csrftoken = getCsrfToken() || '';
+          console.log('token set');
+          performRegister(csrftoken);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
     } else {
       performRegister(csrftoken);
     }
@@ -294,6 +310,22 @@ export default function Feed() {
               labelPlaceholder="Email"
               contentLeft={<MdEmail />}
               aria-label="Email Field"
+            />
+            <Spacer y={2.25} />
+            <Input
+              {...addressBindings}
+              clearable
+              bordered
+              fullWidth
+              shadow={false}
+              onClearClick={resetAddressField}
+              color={"primary"}
+              helperColor={"error"}
+              helperText={addressHelper.text}
+              type="email"
+              labelPlaceholder="Address"
+              contentLeft={<MdAddLocation />}
+              aria-label="Address Field"
             />
             <Spacer y={2.25} />
             <Input.Password
