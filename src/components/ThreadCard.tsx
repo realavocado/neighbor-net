@@ -27,148 +27,115 @@ import MessageModal from "./MessageModal";
 import React from "react";
 
 interface ThreadCardInterface {
-  id: string;
+  id: number;
   item: ThreadItem;
   getMess: () => void;
 }
 
-export default function ThreadCard(props: ThreadCardInterface) {
-  const [messVisible, setMessVisible] = React.useState(false);
+const ThreadCard = React.forwardRef<HTMLDivElement, ThreadCardInterface>(
+  (props, ref) => {
+    const { id, item, getMess } = props;
 
-  function convertDate(input: string | undefined): string {
-    const date = new Date(input ?? 0);
-    return `${date.toLocaleDateString("en-us", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    })} • ${date.toLocaleString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    })}`;
-  }
+    const [messVisible, setMessVisible] = React.useState(false);
 
-  function addPost() {
-    setMessVisible(true);
-  }
+    function convertDate(input: string | undefined): string {
+      const date = new Date(input ?? 0);
+      return `${date.toLocaleDateString("en-us", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })} • ${date.toLocaleString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      })}`;
+    }
 
-  // console.log(props.item.replyMessages);
+    function addPost() {
+      setMessVisible(true);
+    }
 
-  return (
-    <>
-      <Card>
-        <Card.Header>
-          <Row justify={"space-between"} align="center">
-            <UserProfile
-              fullName={props.item.authorName}
-              avatarUrl={props.item.imageUrl}
-            />
-            <div style={{ display: "flex", flexDirection: "row" }}>
-              {props.item.subject ? (
-                <Button flat auto rounded color="warning">
-                  <Text
-                    css={{ color: "inherit" }}
-                    size={12}
-                    weight="bold"
-                    transform="uppercase"
-                  >
-                    {props.item.subject}
-                  </Text>
-                </Button>
-              ) : (
-                <div></div>
-              )}
+    return (
+      <>
+        <Card ref={ref}>
+          <Card.Header>
+            <Row justify={"space-between"} align="center">
+              <UserProfile fullName={item.authorName} avatarUrl={item.imageUrl} />
+              <div style={{ display: "flex", flexDirection: "row" }}>
+                {item.subject ? (
+                  <Button flat auto rounded color="warning">
+                    <Text
+                      css={{ color: "inherit" }}
+                      size={12}
+                      weight="bold"
+                      transform="uppercase"
+                    >
+                      {item.subject}
+                    </Text>
+                  </Button>
+                ) : null}
 
-              {props.item.isWrite ? (
-                <Dropdown>
-                  <Dropdown.Button light>
-                    <BsFillPencilFill />
-                  </Dropdown.Button>
-                  <Dropdown.Menu
-                    aria-label="Static Actions"
-                    onAction={(actionKey) => {
-                      if (actionKey.toString() == "add") {
-                        addPost();
-                      }
-                    }}
-                  >
-                    <Dropdown.Item key="add">Add Post</Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
-              ) : (
-                <div></div>
-              )}
-            </div>
-          </Row>
-        </Card.Header>
-        <Card.Divider />
-        <Card.Body css={{ py: "$10" }}>
-          <Container>
-            <Text h3 b>
-              {props.item.title}
-            </Text>
-            {props.item.eventTime != null ? (
-              <Row align="center">
-                <MdCalendarToday />
-                <Spacer x={0.35} />
-                <Text>{convertDate(props.item.eventTime)}</Text>
-              </Row>
-            ) : (
-              <></>
-            )}
-            <Container gap={0}>
-              <Text>{props.item.text}</Text>
-            </Container>
-            <MapInFeed
-              latitude={props.item.latitude ?? 0}
-              longitude={props.item.longitude ?? 0}
-            />
-          </Container>
-          {/* <Container> */}
-
-          {/* </Container> */}
-        </Card.Body>
-        <Card.Divider />
-        {props.item.replyMessages?.length ? (
-          <Collapse.Group accordion={false}>
-            <Collapse title="Comments">
-              {props.item.replyMessages.map((reply) => (
-                <RepliesCard id={reply.mid} item={reply} />
-              ))}
-            </Collapse>
-          </Collapse.Group>
-        ) : null}
-        <Card.Footer>
-          <Row align="center" justify="space-between">
-            <Row>
-              <Spacer x={0.5} />
-              <Text css={{ opacity: "0.33" }} size={"$sm"} color="">
-                {convertDate(props.item.eventTime)}
-              </Text>
+                {item.isWrite ? (
+                  <Dropdown>
+                    <Dropdown.Button light>
+                      <BsFillPencilFill />
+                    </Dropdown.Button>
+                    <Dropdown.Menu
+                      aria-label="Static Actions"
+                      onAction={(actionKey) => {
+                        if (actionKey.toString() === "add") {
+                          addPost();
+                        }
+                      }}
+                    >
+                      <Dropdown.Item key="add">Add Post</Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown>
+                ) : null}
+              </div>
             </Row>
-            {props.item.visibility ? (
-              <Button flat auto rounded color="secondary">
-                <Text
-                  css={{ color: "inherit" }}
-                  size={12}
-                  weight="bold"
-                  transform="uppercase"
-                >
-                  {props.item.visibility}
-                </Text>
-              </Button>
-            ) : null}
-          </Row>
-        </Card.Footer>
-      </Card>
-      <MessageModal
-        visible={messVisible}
-        setVisible={setMessVisible}
-        tid={props.item.id}
-        reply_mid={props.item.mid}
-        update={props.getMess}
-      />
-      <Spacer y={1} />
-    </>
-  );
-}
+          </Card.Header>
+          <Card.Divider />
+          <Card.Body css={{ py: "$10" }}>
+            <Container>
+              <Text h3 b>
+                {item.title}
+              </Text>
+              {item.eventTime != null ? (
+                <Row align="center">
+                  <Text>{convertDate(item.eventTime)}</Text>
+                </Row>
+              ) : null}
+              <Container gap={0}>
+                <Text>{item.text}</Text>
+              </Container>
+              <MapInFeed latitude={item.latitude ?? 0} longitude={item.longitude ?? 0} />
+            </Container>
+          </Card.Body>
+          <Card.Divider />
+          {item.replyMessages?.length ? (
+            <RepliesCard id={item.mid} item={item.replyMessages[0]} />
+          ) : null}
+          <Card.Footer>
+            <Row align="center" justify="space-between">
+              <Text>{convertDate(item.eventTime)}</Text>
+            </Row>
+          </Card.Footer>
+        </Card>
+        <MessageModal
+          visible={messVisible}
+          setVisible={setMessVisible}
+          tid={id}
+          reply_mid={item.mid}
+          update={getMess}
+        />
+        <Spacer y={1} />
+      </>
+    );
+  }
+);
+
+
+ThreadCard.displayName = "ThreadCard";
+
+export default ThreadCard;

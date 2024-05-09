@@ -35,13 +35,13 @@ export interface ReplyItem {
 
 export interface ThreadItem {
   // thread
-  id: string;
+  id: number;
   topic: string;
   subject: string;
   visibility: string;
   isWrite: boolean;
   // first message
-  mid: string;
+  mid: number;
   title?: string;
   text?: string;
   authorId?: string;

@@ -3,7 +3,7 @@ import { ReplyItem } from "@/types/FeedItem";
 import UserProfile from "./UserProfile";
 
 interface RepliesCardInterface {
-  id: string;
+  id: number;
   item: ReplyItem;
 }
 

@@ -18,8 +18,8 @@ import { text } from "stream/consumers";
 interface MessageModalProps {
   visible: boolean;
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  tid: string;
-  reply_mid: string;
+  tid: number;
+  reply_mid: number;
   update: () => void;
 }
 

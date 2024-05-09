@@ -5,6 +5,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { FaMapSigns } from "react-icons/fa";
 import "leaflet/dist/leaflet.css";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
 
 import { baseURL, getCsrfToken } from "@/api/Request";
 import AuthContext from "@/context/AuthContext";
@@ -35,13 +36,21 @@ const DynamicMap = dynamic(() => import("@/components/Map"), { ssr: false });
 
 export default function Search() {
     const [searchTerm, setSearchTerm] = useState("");
-    //const [searchTerm, setSearchTerm] = useState<string>(() => localStorage.getItem(SEARCH_TERM_KEY) || "");
     const [messages, setMessages] = useState<Message[]>([]);
+    //const [searchTerm, setSearchTerm] = useState<string>(() => localStorage.getItem(SEARCH_TERM_KEY) || "");
     //const [messages, setMessages] = useState<Message[]>(() => {
     //     const storedMessages = localStorage.getItem(MESSAGES_KEY);
     //     return storedMessages ? JSON.parse(storedMessages) : [];
     // });
     const [isLoading, setIsLoading] = useState(false);
+
+    //"See Thread" button event in `Card.Body`
+    const router = useRouter();
+
+    const handleSeeThread = (tid: number) => {
+        // Navigate to the `Feed` page and pass `tid` as query parameter
+        router.push(`/feed?tid=${tid}`);
+    };
 
     // user auth context
     const auth = useContext(AuthContext);
@@ -60,11 +69,11 @@ export default function Search() {
         // Check if localStorage is available on the client side
         const storedSearchTerm = localStorage.getItem(SEARCH_TERM_KEY);
         const storedMessages = localStorage.getItem(MESSAGES_KEY);
-    
+
         if (storedSearchTerm) {
             setSearchTerm(storedSearchTerm);
         }
-    
+
         if (storedMessages) {
             setMessages(JSON.parse(storedMessages));
         }
@@ -172,6 +181,9 @@ export default function Search() {
                                                             </Text>
                                                         </Row>
                                                     )}
+                                                    <Row justify="center" css={{ marginTop: "10px" }}>
+                                                        <Button css={{ backgroundColor: "#28a745", color: "#fff" }} onClick={() => handleSeeThread(message.tid)}>See Thread</Button>
+                                                    </Row>
                                                 </Card.Body>
                                             </Card>
                                         </Grid>

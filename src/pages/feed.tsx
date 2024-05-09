@@ -4,10 +4,11 @@ import { Container, Spacer, Text } from "@nextui-org/react";
 import axios from "axios";
 import dynamic from "next/dynamic";
 import Head from "next/head";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 // import { useAuthState } from "react-firebase-hooks/auth";
 import { baseApiUrl, getCsrfToken } from "@/api/Utils";
 import { set } from "@nandorojo/swr-firestore";
+import { useRouter } from "next/router";
 
 const DynamicComponentWithNoSSR = dynamic(
   () => import("@/components/EventModal"),
@@ -15,13 +16,63 @@ const DynamicComponentWithNoSSR = dynamic(
 );
 
 export default function Feed() {
-  const [user,setUser] = React.useState(false);
+  const [user, setUser] = React.useState(false);
 
   function add(data: ThreadItem | ThreadItem[]) {
     return null;
   }
 
   const [threadList, setThreadList] = React.useState<ThreadItem[]>([]); // FeedItem[]
+  const router = useRouter();
+  const { tid } = router.query;
+  const tidNumber = Number(tid);
+  const cardRefs = useRef<Map<number, HTMLElement>>(new Map());
+
+  const [isThreadInitialized, setThreadInitialized] = React.useState(false);
+  const [isAllCardsRegistered, setAllCardsRegistered] = React.useState(false);
+  const [registeredCount, setRegisteredCount] = React.useState(0);
+  const totalThreadCards = threadList.length;
+
+  // Store `ThreadCard` reference into `Map`
+  const registerCardRef = (id: number, element: HTMLElement) => {
+    if (element  && !cardRefs.current.has(id)) {
+      console.log(`Registering ThreadCard ID: ${id}`);
+      cardRefs.current.set(id, element);
+      setRegisteredCount((count) => count + 1);
+    } 
+    // else {
+    //   console.log(`Unable to register ThreadCard ID: ${id}`);
+    // }
+  };
+
+  React.useEffect(() => {
+    IsUserExist();
+    getVisableMessages();
+  }, []);
+
+  // Track when all thread cards have been registered
+  React.useEffect(() => {
+    if (isThreadInitialized){
+      if (registeredCount === totalThreadCards) {
+        setAllCardsRegistered(true);
+      }
+    }
+  }, [isThreadInitialized, registeredCount, totalThreadCards]);
+
+  // Scroll to the specified `ThreadCard` only after all have been registered
+  React.useEffect(() => {
+    if (isAllCardsRegistered) {
+      console.log(`Navigating to Thread ID: ${tidNumber}`);
+      console.log(`Available Thread IDs:`, Array.from(cardRefs.current.keys()));
+      if (tidNumber && cardRefs.current.has(tidNumber)) {
+        const card = cardRefs.current.get(tidNumber);
+        if (card) {
+          console.log(`Scroll target position:`, card.getBoundingClientRect());
+          card.scrollIntoView({ block: "center", behavior: "smooth" });
+        }
+      }
+    }
+  }, [isAllCardsRegistered, tidNumber]);
 
   // check if user is logged in
   function IsUserExist() {
@@ -94,6 +145,7 @@ export default function Feed() {
         }
         // console.log(tdList);
         setThreadList(tdList);
+        setThreadInitialized(true);
       })
       .catch((error) => {
         setThreadList([]);
@@ -109,11 +161,6 @@ export default function Feed() {
     setVisible(false);
     console.log("closed");
   };
-
-  React.useEffect(() => {
-    IsUserExist();
-    getVisableMessages();
-  }, []);
 
   return (
     <>
@@ -144,7 +191,7 @@ export default function Feed() {
             <Spacer y={1} />
             {threadList ? (
               threadList.map((item) => {
-                return <ThreadCard key={item.id} id={item.id} item={item} getMess={getVisableMessages}/>;
+                return <ThreadCard key={item.id} id={item.id} item={item} getMess={getVisableMessages} ref={(el) => el && registerCardRef(item.id, el)} />;
               })
             ) : (
               <></>
