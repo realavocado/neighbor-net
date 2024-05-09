@@ -1,7 +1,5 @@
 import MainLogo from "@/components/MainLogo";
-import { auth } from "@/pages/_app";
 import User from "@/types/User";
-import { useCollection, useDocument } from "@nandorojo/swr-firestore";
 import {
   Avatar,
   Button,
@@ -18,14 +16,14 @@ import {
 } from "@nextui-org/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useState, useContext } from "react";
-import { useAuthState } from "react-firebase-hooks/auth";
+import React, { useState, useContext, useEffect } from "react";
 import { HiEye, HiEyeOff } from "react-icons/hi";
 import { MdEmail, MdLock } from "react-icons/md";
 import ImageUploading, { ImageListType } from "react-images-uploading";
 import { fetchAndStoreCsrfToken, getCsrfToken, baseURL } from "@/api/Request";
 import { useSSR } from "@nextui-org/react";
 import AuthContext from "@/context/AuthContext";
+import axios from "axios";
 
 export default function MainNavbar() {
   const { isBrowser } = useSSR()
@@ -39,13 +37,6 @@ export default function MainNavbar() {
     setProfileVisible(false);
     console.log("closed");
   };
-  //const [user] = useAuthState(auth);
-
-  const {
-    data: userData,
-    update: updateUserData,
-    error: userDataError,
-  } = useDocument<User>(`users/${auth.currentUser?.uid}`);
 
   const [images, setImages] = React.useState([]);
   const maxNumber = 1;
@@ -59,29 +50,51 @@ export default function MainNavbar() {
     setImages(imageList as never[]);
   };
 
-  // For edit profile
-  // const [address, setAddress] = useState(userData?.address || ''); // Initialize address state with userData?.address
-  // const [fullName, setFullName] = useState(userData?.fullName || '');
-  // const [bio, setBio] = useState(userData?.bio || '');
+  const auth = useContext(AuthContext);
 
-  const userAuth = useContext(AuthContext);
-  if (!userAuth) {
-    return <p>Authentication context is not available.</p>;
-  }
-  const { user } = userAuth;
+  useEffect(() => {
+    // Check if user has logged out and clean local storage
+    if (auth && auth.user) {
+      setAddress(auth.user.address);
+      setUserName(auth.user.username);
+      setBio(auth.user.bio);
+    }
+  }, [auth]);
+
+  // For edit profile
+  const [username, setUserName] = useState('');
+  const [address, setAddress] = useState('');
+  const [bio, setBio] = useState('');
+  const [isLoading, setIsLoading] = useState(false); //update button
 
   function signOut() {
-    userAuth?.logout();
+    auth?.logout();
   }
 
-  
-  // function handleSubmit() {
-  //   console.log(userData?.fullName)
-  //   console.log(address)
-  //   console.log(fullName)
-  // }
 
-  return isBrowser? (
+  function updateProfile() {
+    setIsLoading(true);
+    axios.post(baseURL + 'users/update_user_info/', {
+      "username": username,
+      "address": address,
+      "bio": bio,
+    }, {
+      withCredentials: true,
+      headers: {
+        "x-csrftoken": getCsrfToken(),
+      },
+    }).then(response => {
+      setIsLoading(false);
+      alert('Updated Successfully.');
+      auth?.setUser(response.data.user);
+    }).catch(error => {
+      setIsLoading(false);
+      const errorMessage = error.response ? error.response.data : error.message;
+      alert(`Error: ${errorMessage}`);
+    });
+  }
+
+  return isBrowser ? (
     <Navbar variant={"sticky"}>
       <Navbar.Brand>
         <Navbar.Toggle showIn={"xs"} aria-label="toggle navigation" />
@@ -152,7 +165,7 @@ export default function MainNavbar() {
                     onClick={onImageUpload}
                     {...dragProps}
                   >
-                    Click or Drop here
+                    Update your avatar
                   </button>
                   {imageList.map((image, index) => (
                     <div key={index} className="image-item">
@@ -178,9 +191,9 @@ export default function MainNavbar() {
             color="primary"
             size="lg"
             label="Username"
-            // initialValue={userData?.fullName}
-            // value={fullName}
-            // onChange={(e) => setFullName(e.target.value)}
+            //initialValue={auth?.user?.username}
+            value={username}
+            onChange={(e) => setUserName(e.target.value)}
           />
 
           <Textarea
@@ -189,9 +202,9 @@ export default function MainNavbar() {
             color="primary"
             size="lg"
             label="bio"
-            // initialValue={userData?.bio}
-            // value={bio}
-            // onChange={(e) => setBio(e.target.value)}
+            //initialValue={auth?.user?.bio}
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
           />
 
           <Input
@@ -200,9 +213,9 @@ export default function MainNavbar() {
             color="primary"
             size="lg"
             label="address"
-            // initialValue={userData?.address}
-            // value={address}
-            // onChange={(e) => setAddress(e.target.value)}
+            //initialValue={auth?.user?.address}
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
           />
 
           <Button
@@ -212,31 +225,31 @@ export default function MainNavbar() {
             //   locationValue.length < 3 ||
             //   disableSubmit
             // }
-            // onPress={handleSubmit}
+            onPress={updateProfile}
           >
-            <>Update</>
+            {isLoading ? <Loading type="default" color="currentColor" size="sm" /> : "Update"}
           </Button>
 
-          
+
         </Modal.Body>
       </Modal>
 
-      
+
       <Navbar.Content>
         <Dropdown placement="bottom-right">
           <Navbar.Item>
             <Row align="center">
               {/* if user is logged in */}
               {/* display username and avatar after login */}
-              {user ? ( 
+              {auth?.user ? (
                 <>
-                  <Text b>{user.full_name}</Text>
+                  <Text b>{auth?.user.full_name}</Text>
                   <Spacer x={0.45} />
                   <Dropdown.Trigger>
                     <Avatar
                       size="md"
                       src={
-                          "https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png"
+                        "https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png"
                       }
                     />
                   </Dropdown.Trigger>
@@ -273,7 +286,7 @@ export default function MainNavbar() {
                 Signed in as:
               </Text>
               <Text b color="inherit" css={{ d: "flex" }}>
-                {user?.email}
+                {auth?.user?.email}
               </Text>
             </Dropdown.Item>
             <Dropdown.Item key="editProfile" withDivider>
@@ -308,7 +321,7 @@ export default function MainNavbar() {
         </Navbar.CollapseItem>
         <Navbar.CollapseItem key={"rela"}>
           <Link color="inherit" href="/rela">
-          Neighbor & Friend
+            Neighbor & Friend
           </Link>
         </Navbar.CollapseItem>
         <Navbar.CollapseItem key={"request"}>
@@ -318,7 +331,7 @@ export default function MainNavbar() {
         </Navbar.CollapseItem>
       </Navbar.Collapse>
     </Navbar>
-  ):null;
+  ) : null;
 }
 
 interface LoginModalProps {
@@ -378,15 +391,15 @@ function LoginModal(props: LoginModalProps) {
     if (!csrftoken) {
       console.log('fetch new token');
       fetchAndStoreCsrfToken()
-      .then(() => {
-        csrftoken = getCsrfToken() || '';
-        console.log('new token: ' + csrftoken);
-        console.log('token set');
-        performLogin(csrftoken);
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
+        .then(() => {
+          csrftoken = getCsrfToken() || '';
+          console.log('new token: ' + csrftoken);
+          console.log('token set');
+          performLogin(csrftoken);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
     } else {
       performLogin(csrftoken);
     }
@@ -399,7 +412,7 @@ function LoginModal(props: LoginModalProps) {
   if (!userAuth) {
     return <p>Authentication context is not available.</p>;
   }
-  const{ setUser } = userAuth;
+  const { setUser } = userAuth;
 
   function inputsValid(): boolean {
     if (emailHelper.color == "success" && passwordValue.length >= 6) {
@@ -423,26 +436,26 @@ function LoginModal(props: LoginModalProps) {
       credentials: 'include',
       body: formData
     })
-    .then(response => {
-      if (response.ok) { // Checks if the response status is in the 200-299 range
-        return response.json(); // Parse JSON from the response, returns a promise
-      } else {
-        throw new Error('Network response was not ok.');
-      }
-    })
-    .then(data => { // Here 'data' is the parsed JSON object
-      if (data.user) {
-        setUser(data.user as User); // Assuming 'setUser' is a function to handle the user data
-      }
-      console.log('login request');
-      setLoading(false);
-      closeHandler();
-    })
-    .catch(error => {
-      setLoading(false);
-      console.error('Login failed:', error);
-      alert('Login failed: ' + error.message);
-    });
+      .then(response => {
+        if (response.ok) { // Checks if the response status is in the 200-299 range
+          return response.json(); // Parse JSON from the response, returns a promise
+        } else {
+          throw new Error('Network response was not ok.');
+        }
+      })
+      .then(data => { // Here 'data' is the parsed JSON object
+        if (data.user) {
+          setUser(data.user as User); // Assuming 'setUser' is a function to handle the user data
+        }
+        console.log('login request');
+        setLoading(false);
+        closeHandler();
+      })
+      .catch(error => {
+        setLoading(false);
+        console.error('Login failed:', error);
+        alert('Login failed: ' + error.message);
+      });
   }
 
   return (

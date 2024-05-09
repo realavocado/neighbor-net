@@ -2,7 +2,6 @@ import { Container, Spacer, Text, Input, Button, Row, Col, Card, Grid, Loading, 
 import axios from "axios";
 import Head from "next/head";
 import React, { useState, useContext, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { FaMapSigns } from "react-icons/fa";
 import "leaflet/dist/leaflet.css";
 import dynamic from "next/dynamic";
@@ -35,13 +34,13 @@ const DynamicComponentWithNoSSR = dynamic(
 const DynamicMap = dynamic(() => import("@/components/Map"), { ssr: false });
 
 export default function Search() {
-    //const [searchTerm, setSearchTerm] = useState("");
-    const [searchTerm, setSearchTerm] = useState<string>(() => localStorage.getItem(SEARCH_TERM_KEY) || "");
-    //const [messages, setMessages] = useState<Message[]>([]);
-    const [messages, setMessages] = useState<Message[]>(() => {
-        const storedMessages = localStorage.getItem(MESSAGES_KEY);
-        return storedMessages ? JSON.parse(storedMessages) : [];
-    });
+    const [searchTerm, setSearchTerm] = useState("");
+    //const [searchTerm, setSearchTerm] = useState<string>(() => localStorage.getItem(SEARCH_TERM_KEY) || "");
+    const [messages, setMessages] = useState<Message[]>([]);
+    //const [messages, setMessages] = useState<Message[]>(() => {
+    //     const storedMessages = localStorage.getItem(MESSAGES_KEY);
+    //     return storedMessages ? JSON.parse(storedMessages) : [];
+    // });
     const [isLoading, setIsLoading] = useState(false);
 
     // user auth context
@@ -57,6 +56,19 @@ export default function Search() {
         }
     }, [auth]);
 
+    useEffect(() => {
+        // Check if localStorage is available on the client side
+        const storedSearchTerm = localStorage.getItem(SEARCH_TERM_KEY);
+        const storedMessages = localStorage.getItem(MESSAGES_KEY);
+    
+        if (storedSearchTerm) {
+            setSearchTerm(storedSearchTerm);
+        }
+    
+        if (storedMessages) {
+            setMessages(JSON.parse(storedMessages));
+        }
+    }, []);
 
     function handleInputChange(event: React.ChangeEvent<any>) {
         setSearchTerm(event.target.value);
@@ -79,13 +91,15 @@ export default function Search() {
         });
     }
 
-    // useEffect(() => {
-    //     localStorage.setItem(SEARCH_TERM_KEY, searchTerm);
-    // }, [searchTerm]);
-
-    // useEffect(() => {
-    //     localStorage.setItem(MESSAGES_KEY, JSON.stringify(messages));
-    // }, [messages]);
+    function highlightText(text: string, keyword: string): string {
+        if (!text) {
+            return "";
+        }
+        // Create a regular expression to match all case-insensitive keywords
+        const regex = new RegExp(`(${keyword})`, "gi");
+        // Wrap matching keywords in <mark> tags
+        return text.replace(regex, "<mark>$1</mark>");
+    }
 
     const isSearchDisabled = !auth || !auth.user || searchTerm.trim() === "" || isLoading;
 
@@ -131,7 +145,8 @@ export default function Search() {
                                             <Card>
                                                 <Card.Header css={{ justifyContent: "space-between" }}>
                                                     <Row align="center">
-                                                        <Text h4 css={{ marginRight: "auto" }}>{message.title}</Text>
+                                                        <Text h4 dangerouslySetInnerHTML={{ __html: highlightText(message.title, searchTerm) }} />
+                                                        {/* <Text h4 css={{ marginRight: "auto" }}>{message.title}</Text> */}
                                                     </Row>
                                                     <Row align="center" justify="flex-end">
                                                         <Avatar
@@ -144,7 +159,8 @@ export default function Search() {
                                                     </Row>
                                                 </Card.Header>
                                                 <Card.Body>
-                                                    <Text>{message.text}</Text>
+                                                    <Text dangerouslySetInnerHTML={{ __html: highlightText(message.text, searchTerm) }} />
+                                                    {/* <Text>{message.text}</Text> */}
                                                     <Text size={12} color="gray">{message.timestamp}</Text>
                                                     {message.latitude !== null && message.longitude !== null ? (
                                                         <DynamicMap latitude={message.latitude} longitude={message.longitude} />
