@@ -131,6 +131,7 @@ export default function Feed() {
     formData.append('email', emailValue);
     formData.append('password1', passwordValue);
     formData.append('password2', passwordConfirmValue);
+    formData.append('image_url', 'https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png');
 
     fetch(baseURL + 'users/register/', {
       method: 'POST',

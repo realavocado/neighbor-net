@@ -142,7 +142,7 @@ export default function MainNavbar() {
           </Text>
         </Modal.Header>
         <Modal.Body>
-          <Row justify="center">
+          {/* <Row justify="center">
             <ImageUploading
               multiple
               value={images}
@@ -183,7 +183,7 @@ export default function MainNavbar() {
                 </div>
               )}
             </ImageUploading>
-          </Row>
+          </Row> */}
 
           <Input
             bordered
