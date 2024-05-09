@@ -44,6 +44,8 @@ export default function Request() {
           frs.push(fr);
         }
         setFriendRequests(frs);
+      }).catch((error) => {
+        console.log(error);
       });
   }
 
@@ -67,6 +69,8 @@ export default function Request() {
           jbrs.push(jbr);
         }
         setJoinBlockRequests(jbrs);
+      }).catch((error) => {
+        console.log(error);
       });
   }
       

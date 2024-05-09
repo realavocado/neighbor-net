@@ -45,6 +45,8 @@ export default function Rela() {
           friends.push(friend);
         }
         setFriends(friends);
+      }).catch((error) => {
+        console.log(error);
       });
   }
 
@@ -69,6 +71,8 @@ export default function Rela() {
           neighbors.push(neighbor);
         }
         setNeighbors(neighbors);
+      }).catch((error) => {
+        console.log(error);
       });
   }
 
