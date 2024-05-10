@@ -53,8 +53,8 @@ export default function FeedCard(props: FeedCardInterface) {
         <Card.Header>
           <Row justify={"space-between"} align="center">
             <UserProfile
-              fullName={props.item.author.fullName}
-              avatarUrl={props.item.author.avatarUrl}
+              fullName={props.item.author.username}
+              avatarUrl={props.item.imageUrl}
             ></UserProfile>
             <div
               style={{ display: "flex", flexDirection: "row" }}

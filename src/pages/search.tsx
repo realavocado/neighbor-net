@@ -134,6 +134,7 @@ export default function Search() {
                                     placeholder="Search Keywords..."
                                     value={searchTerm}
                                     onChange={handleInputChange}
+                                    aria-label="Search Keywords"
                                 />
                             </Col>
                             <Button auto onClick={handleSearch} disabled={isSearchDisabled || isLoading} css={{ marginLeft: "10px" }}>
