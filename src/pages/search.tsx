@@ -183,7 +183,7 @@ export default function Search() {
                                                         </Row>
                                                     )}
                                                     <Row justify="center" css={{ marginTop: "10px" }}>
-                                                        <Button css={{ backgroundColor: "#28a745", color: "#fff" }} onClick={() => handleSeeThread(message.tid)}>See Thread</Button>
+                                                        <Button onClick={() => handleSeeThread(message.tid)}>See Thread</Button>
                                                     </Row>
                                                 </Card.Body>
                                             </Card>
