@@ -35,6 +35,7 @@ interface ThreadCardInterface {
 const ThreadCard = React.forwardRef<HTMLDivElement, ThreadCardInterface>(
   (props, ref) => {
     const { id, item, getMess } = props;
+    console.log("ThreadCard", item);
 
     const [messVisible, setMessVisible] = React.useState(false);
 
@@ -113,9 +114,15 @@ const ThreadCard = React.forwardRef<HTMLDivElement, ThreadCardInterface>(
             </Container>
           </Card.Body>
           <Card.Divider />
-          {item.replyMessages?.length ? (
-            <RepliesCard id={item.mid} item={item.replyMessages[0]} />
-          ) : null}
+          {props.item.replyMessages?.length ? (
+          <Collapse.Group accordion={false}>
+            <Collapse title="Comments">
+              {props.item.replyMessages.map((reply) => (
+                <RepliesCard id={reply.mid} item={reply} />
+              ))}
+            </Collapse>
+          </Collapse.Group>
+        ) : null}
           <Card.Footer>
             <Row align="center" justify="space-between">
               <Text>{convertDate(item.eventTime)}</Text>
